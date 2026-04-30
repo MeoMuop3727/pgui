@@ -17,7 +17,7 @@
         "icon": "packages/assets/icon.png"
     },
     "render": {
-        "background_color": "#FFFFFF"
+        "background-color": "#FFFFFF"
     },
     "debug": {
         "show-fps": false
