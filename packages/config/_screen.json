@@ -1,8 +1,8 @@
 {
     "window": {
-        "height": 1280,
-        "width": 720,
-        "max-height": 820,
+        "height": 720,
+        "width": 1280,
+        "max-height": 920,
         "max-width": 1920,
         "min-height": 680,
         "min-width": 1080,

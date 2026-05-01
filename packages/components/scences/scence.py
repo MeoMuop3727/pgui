@@ -1,8 +1,4 @@
 import pygame
-from packages.systems.config import load_config_screen
-
-__color_clear_frame = load_config_screen()["render"]["background-color"]
-
 class Scence:
 
     """
@@ -24,8 +20,8 @@ class Scence:
     def update(self, dental: float) -> None:
         pass
     
-    def render(self, screen) -> None:
-        screen.fill(__color_clear_frame) # Clear frame each after updating
+    def render(self, screen: pygame.Surface) -> None:
+        pass
 
 # Just export Scence class
 __all__ = ["Scence"]
