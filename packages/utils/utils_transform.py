@@ -21,6 +21,6 @@ def hex_to_rbg(color: ColorType) -> RGB_COLOR:
     
     raise ValueError("Invalid color format, the color must be ColorType")
 
-def to_array(value: Vec2) -> NDArray:
-    """Convert Vec2 / Tuple[int,int] -> NDArray"""
+def to_array(value: Tuple[int]) -> NDArray:
+    """Convert Tuple[int] -> NDArray"""
     return numpy.array(value, dtype=numpy.int32)

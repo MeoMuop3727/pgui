@@ -21,11 +21,18 @@ manager = ManageScence(screen)
 def test_on_click():
     print("Clicked")
 
+def draw_home(surface: pygame.Surface):
+    font = pygame.font.Font(None, 40)
+    txt = font.render("HOME PAGE", True, "#000000")
+    surface.blit(txt, (30, 30))
+
 class ScenceTest(Scence):
     def __init__(self, surface: pygame.Surface):
         super().__init__()
 
         self.__surface = surface
+
+        
     
     def render(self, screen):
         screen.fill("#ffffff")

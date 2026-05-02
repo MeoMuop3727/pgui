@@ -6,4 +6,3 @@ ColorType = Union[HEX_COLOR, RGB_COLOR]
 
 Vec2 = Tuple[int,int]
 
-PaddingType = Tuple[int, int, int, int]  # top left right bottom
