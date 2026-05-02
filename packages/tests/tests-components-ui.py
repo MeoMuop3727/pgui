@@ -39,4 +39,4 @@ class ScenceTest(Scence):
 
 manager.push_scence(ScenceTest(screen))
 
-manager.run()
+manager.run() # python3 -m packages.tests.tests-components-ui

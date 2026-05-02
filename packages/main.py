@@ -3,393 +3,321 @@ from __future__ import annotations
 import pygame
 import numpy as np
 
-from dataclasses import dataclass, field
-from typing import Callable, Dict, Optional, Tuple, Literal
+from dataclasses import dataclass
+from typing import Tuple, Union, List
 
+# ==========================================================
+# INIT
+# ==========================================================
 pygame.init()
 
 # ==========================================================
-# TYPE ALIAS
+# TYPE
 # ==========================================================
-ColorType = Tuple[int, int, int] | str
+ColorType = Union[str, Tuple[int, int, int]]
 Vec2 = Tuple[int, int]
-PaddingType = Tuple[int, int, int, int]  # top left right bottom
 
 
 # ==========================================================
 # HELPER
 # ==========================================================
 def _to_color(value: ColorType) -> Tuple[int, int, int]:
-    """Convert HEX / RGB -> RGB"""
+    """
+    Convert HEX hoặc RGB sang RGB tuple.
+    """
     if isinstance(value, tuple):
         return value
 
-    value = value.replace("#", "")
+    value = value.strip().replace("#", "")
+
+    if len(value) != 6:
+        raise ValueError("HEX color must be 6 characters.")
+
     return tuple(int(value[i:i + 2], 16) for i in (0, 2, 4))
 
 
-def _np(v: tuple[int, ...]) -> np.ndarray:
-    return np.array(v, dtype=np.int32)
+def _np(value: Vec2) -> np.ndarray:
+    """
+    Convert tuple -> numpy ndarray
+    """
+    return np.array(value, dtype=np.int32)
 
 
 # ==========================================================
 # STYLE
 # ==========================================================
-@dataclass
-class Style:
-    # Tab panel
-    Tabs_list: Dict[str, Optional[Callable[[pygame.Surface], None]]] = field(
-        default_factory=dict
-    )
+@dataclass(slots=True)
+class StyleTextBox:
+    Surface: pygame.Surface
+    Content: str = ""
 
-    # normal
-    Color: ColorType = "#000000"
-    Bg_color: ColorType = "#ffffff"
+    Font: pygame.font.Font = pygame.font.Font(None, 25)
 
-    # hover
-    Color_hover: ColorType = "#ffffff"
-    Bg_color_hover: ColorType = "#444444"
+    Color: ColorType = "#333333"
+    Bg_color: ColorType = "#cccccc"
 
-    # pressed
-    Color_pressed: ColorType = "#ffffff"
-    Bg_color_pressed: ColorType = "#222222"
-
-    # disable
-    Color_disable: ColorType = "#888888"
-    Bg_color_disable: ColorType = "#cccccc"
-
-    # general
-    Font: pygame.font.Font = field(
-        default_factory=lambda: pygame.font.Font(None, 20)
-    )
+    Antialias: bool = True
 
     Pos: Vec2 = (0, 0)
-    Percent_width_tab_panel: float = 0.35
-    Size: Vec2 = (700, 500)
+    Size: Vec2 = (500, 400)
 
-    Border: int = 1
+    Border: int = 0
     Border_radius: int = 0
     Border_color: ColorType = "#000000"
 
-    Active_tab: int = 0
-
-    Title: str = ""
-    Title_color: ColorType = "#f0f0f0"
+    Padding: int = 0
+    Line_height: int = 0
 
     Visible: bool = True
 
-    Padding: PaddingType = (0, 0, 0, 0)
-
 
 # ==========================================================
-# TAB PANEL
+# TEXTBOX
 # ==========================================================
-class TabPanel:
-    def __init__(self, surface: pygame.Surface, style: Style):
-        self._surface = surface
-        self._style = style
+class TextBox:
+    """
+    TextBox hiển thị đoạn văn bản nhiều dòng có auto wrap text.
 
-        self._hover_index: int = -1
+    Parameters
+    ----------
+    style : StyleTextBox
 
-    def _draw_tabs(
-        self,
-        panel_rect: pygame.Rect,
-        vertical: bool = True
-    ) -> list[pygame.Rect]:
+        Surface:
+            nơi textbox được vẽ lên.
 
-        tabs = list(self._style.Tabs_list.keys())
-        count = len(tabs)
+        Content:
+            nội dung text cần hiển thị.
 
-        rects: list[pygame.Rect] = []
+        Font:
+            pygame.font.Font dùng để render chữ.
 
-        if count == 0:
-            return rects
+        Color:
+            màu chữ (HEX hoặc RGB).
 
-        if vertical:
-            tab_h = panel_rect.height // count
+        Bg_color:
+            màu nền textbox.
 
-            for i, name in enumerate(tabs):
-                pos = _np((panel_rect.x, panel_rect.y)) + _np((0, i * tab_h))
-                size = _np((panel_rect.width, tab_h))
+        Antialias:
+            làm mượt chữ.
 
-                rect = pygame.Rect(
-                    int(pos[0]), int(pos[1]),
-                    int(size[0]), int(size[1])
-                )
-                rects.append(rect)
+        Pos:
+            vị trí textbox (x, y).
 
-                self._draw_single_tab(rect, name, i)
+        Size:
+            kích thước textbox (width, height).
 
-        else:
-            tab_w = panel_rect.width // count
+        Border:
+            độ dày border.
 
-            for i, name in enumerate(tabs):
-                pos = _np((panel_rect.x, panel_rect.y)) + _np((i * tab_w, 0))
-                size = _np((tab_w, panel_rect.height))
+        Border_radius:
+            bo góc textbox.
 
-                rect = pygame.Rect(
-                    int(pos[0]), int(pos[1]),
-                    int(size[0]), int(size[1])
-                )
-                rects.append(rect)
+        Border_color:
+            màu border.
 
-                self._draw_single_tab(rect, name, i)
+        Padding:
+            khoảng cách text với viền.
 
-        return rects
+        Line_height:
+            khoảng cách thêm giữa các dòng.
 
-    def _draw_single_tab(
-        self,
-        rect: pygame.Rect,
-        text: str,
-        index: int
-    ) -> None:
+        Visible:
+            có hiển thị hay không.
+    """
 
-        if index == self._style.Active_tab:
-            bg = _to_color(self._style.Bg_color_pressed)
-            fg = _to_color(self._style.Color_pressed)
+    def __init__(self, style: StyleTextBox) -> None:
+        self.__surface: pygame.Surface = style.Surface
+        self.__style: StyleTextBox = style
 
-        elif index == self._hover_index:
-            bg = _to_color(self._style.Bg_color_hover)
-            fg = _to_color(self._style.Color_hover)
+    # ======================================================
+    # PRIVATE
+    # ======================================================
+    def __wrap_text_box(self) -> List[str]:
+        """
+        Trả về list dòng text đã wrap.
 
-        else:
-            bg = _to_color(self._style.Bg_color)
-            fg = _to_color(self._style.Color)
+        Điều kiện:
+        chiều rộng mỗi dòng không vượt quá width textbox.
+        """
+        content: str = self.__style.Content
+        font = self.__style.Font
 
-        pygame.draw.rect(
-            self._surface,
-            bg,
-            rect,
-            border_radius=self._style.Border_radius
+        width_limit = (
+            self.__style.Size[0] - self.__style.Padding * 2
         )
 
-        if self._style.Border > 0:
-            pygame.draw.rect(
-                self._surface,
-                _to_color(self._style.Border_color),
-                rect,
-                self._style.Border,
-                border_radius=self._style.Border_radius
-            )
+        words = content.split(" ")
+        lines: List[str] = []
 
-        text_surface = self._style.Font.render(text, True, fg)
-        text_rect = text_surface.get_rect(center=rect.center)
-        self._surface.blit(text_surface, text_rect)
+        current_line = ""
 
-    def _on_click(self, mouse_pos: Vec2, rects: list[pygame.Rect]) -> None:
-        for i, rect in enumerate(rects):
-            if rect.collidepoint(mouse_pos):
-                self._style.Active_tab = i
+        for word in words:
+            test_line = word if current_line == "" else current_line + " " + word
+
+            text_width = font.size(test_line)[0]
+
+            if text_width <= width_limit:
+                current_line = test_line
+            else:
+                if current_line:
+                    lines.append(current_line)
+                current_line = word
+
+        if current_line:
+            lines.append(current_line)
+
+        return lines
+
+    def __draw_bg(self) -> None:
+        """
+        Vẽ background textbox.
+        """
+        if not self.__style.Visible:
+            return
+
+        pos = _np(self.__style.Pos)
+        size = _np(self.__style.Size)
+
+        rect = pygame.Rect(
+            int(pos[0]),
+            int(pos[1]),
+            int(size[0]),
+            int(size[1]),
+        )
+
+        pygame.draw.rect(
+            self.__surface,
+            _to_color(self.__style.Bg_color),
+            rect,
+            border_radius=self.__style.Border_radius,
+        )
+
+    def __draw_border(self) -> None:
+        """
+        Vẽ border textbox.
+        """
+        if not self.__style.Visible:
+            return
+
+        if self.__style.Border <= 0:
+            return
+
+        pos = _np(self.__style.Pos)
+        size = _np(self.__style.Size)
+
+        rect = pygame.Rect(
+            int(pos[0]),
+            int(pos[1]),
+            int(size[0]),
+            int(size[1]),
+        )
+
+        pygame.draw.rect(
+            self.__surface,
+            _to_color(self.__style.Border_color),
+            rect,
+            width=self.__style.Border,
+            border_radius=self.__style.Border_radius,
+        )
+
+    def __draw_text(self) -> None:
+        """
+        Vẽ text đã wrap lên textbox.
+        """
+        if not self.__style.Visible:
+            return
+
+        lines = self.__wrap_text_box()
+
+        pos = _np(self.__style.Pos)
+        padding = self.__style.Padding
+
+        x = int(pos[0]) + padding
+        y = int(pos[1]) + padding
+
+        font = self.__style.Font
+        color = _to_color(self.__style.Color)
+
+        line_step = font.get_height() + self.__style.Line_height
+
+        max_height = self.__style.Size[1] - padding
+
+        for line in lines:
+            if y + font.get_height() > int(pos[1]) + max_height:
                 break
 
-    def update(
-        self,
-        panel_rect: pygame.Rect,
-        vertical: bool,
-        events: list[pygame.event.Event]
-    ) -> None:
-
-        rects = self._draw_tabs(panel_rect, vertical)
-
-        self._hover_index = -1
-        mouse = pygame.mouse.get_pos()
-
-        for i, rect in enumerate(rects):
-            if rect.collidepoint(mouse):
-                self._hover_index = i
-
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    self._on_click(event.pos, rects)
-
-
-# ==========================================================
-# TAB FRAME
-# ==========================================================
-class TabFrame:
-    def __init__(self, surface: pygame.Surface, style: Style):
-        self._surface = surface
-        self._style = style
-
-    def _draw_frame_content(
-        self,
-        frame_rect: pygame.Rect
-    ) -> None:
-
-        funcs = list(self._style.Tabs_list.values())
-
-        if not funcs:
-            return
-
-        idx = self._style.Active_tab
-
-        if idx >= len(funcs):
-            return
-
-        func = funcs[idx]
-
-        if func is not None:
-            sub = self._surface.subsurface(frame_rect)
-            func(sub)
-
-    def update(self, frame_rect: pygame.Rect) -> None:
-        pygame.draw.rect(
-            self._surface,
-            _to_color(self._style.Bg_color),
-            frame_rect
-        )
-
-        pygame.draw.rect(
-            self._surface,
-            _to_color(self._style.Border_color),
-            frame_rect,
-            self._style.Border
-        )
-
-        self._draw_frame_content(frame_rect)
-
-
-# ==========================================================
-# TAB
-# ==========================================================
-class Tab:
-    def __init__(
-        self,
-        tab_type: Literal["vertical", "horizontial"],
-        pos_tabpanel: str,
-        screen: pygame.Surface,
-        style: Style
-    ):
-
-        self._type = tab_type
-        self._pos_tabpanel = pos_tabpanel
-        self._screen = screen
-        self._style = style
-
-        self._surface = pygame.Surface(style.Size)
-
-        self._panel = TabPanel(self._surface, style)
-        self._frame = TabFrame(self._surface, style)
-
-    def _get_layout(self) -> tuple[pygame.Rect, pygame.Rect]:
-
-        w, h = self._style.Size
-        percent = self._style.Percent_width_tab_panel
-
-        if self._type == "horizontial":
-            pw = int(w * percent)
-
-            if self._pos_tabpanel == "right":
-                panel = pygame.Rect(w - pw, 0, pw, h)
-                frame = pygame.Rect(0, 0, w - pw, h)
-            else:
-                panel = pygame.Rect(0, 0, pw, h)
-                frame = pygame.Rect(pw, 0, w - pw, h)
-
-        else:
-            ph = int(h * percent)
-
-            if self._pos_tabpanel == "bottom":
-                panel = pygame.Rect(0, h - ph, w, ph)
-                frame = pygame.Rect(0, 0, w, h - ph)
-            else:
-                panel = pygame.Rect(0, 0, w, ph)
-                frame = pygame.Rect(0, ph, w, h - ph)
-
-        return panel, frame
-
-    def update(self) -> None:
-        if not self._style.Visible:
-            return
-
-        events = pygame.event.get()
-
-        self._surface.fill((240, 240, 240))
-
-        panel_rect, frame_rect = self._get_layout()
-
-        vertical_tabs = self._type == "horizontial"
-
-        self._panel.update(panel_rect, vertical_tabs, events)
-        self._frame.update(frame_rect)
-
-        # title
-        if self._style.Title:
-            txt = self._style.Font.render(
-                self._style.Title,
-                True,
-                _to_color(self._style.Title_color)
+            text_surface = font.render(
+                line,
+                self.__style.Antialias,
+                color
             )
-            self._surface.blit(txt, (10, 5))
 
-        self._screen.blit(self._surface, self._style.Pos)
+            self.__surface.blit(text_surface, (x, y))
 
-        for event in events:
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                raise SystemExit
+            y += line_step
+
+    # ======================================================
+    # PUBLIC
+    # ======================================================
+    def update(self) -> None:
+        """
+        Cập nhật textbox.
+        """
+        if not self.__style.Visible:
+            return
+
+        self.__draw_bg()
+        self.__draw_border()
+        self.__draw_text()
 
 
 # ==========================================================
 # DEMO
 # ==========================================================
-def draw_home(surface: pygame.Surface):
-    font = pygame.font.Font(None, 40)
-    txt = font.render("HOME PAGE", True, (0, 0, 0))
-    surface.blit(txt, (30, 30))
-
-
-def draw_profile(surface: pygame.Surface):
-    font = pygame.font.Font(None, 40)
-    txt = font.render("PROFILE PAGE", True, (0, 0, 0))
-    surface.blit(txt, (30, 30))
-
-
-def draw_setting(surface: pygame.Surface):
-    font = pygame.font.Font(None, 40)
-    txt = font.render("SETTING PAGE", True, (0, 0, 0))
-    surface.blit(txt, (30, 30))
-
-
-def main():
+def main() -> None:
     screen = pygame.display.set_mode((1000, 700))
+    pygame.display.set_caption("TextBox Demo")
+
     clock = pygame.time.Clock()
 
-    style = Style(
-        Pos=(100, 80),
-        Size=(800, 500),
-        Title="My Tab UI",
-        Percent_width_tab_panel=0.25,
-        Tabs_list={
-            "Home": draw_home,
-            "Profile": draw_profile,
-            "Setting": draw_setting
-        },
-        Bg_color="#ffffff",
-        Bg_color_hover="#3498db",
-        Bg_color_pressed="#2c3e50",
-        Color="#000000",
-        Color_hover="#ffffff",
-        Color_pressed="#ffffff",
-        Border=1,
-        Border_color="#000000",
+    content = (
+        "Đây là TextBox dùng pygame + numpy. "
+        "Text sẽ tự động xuống dòng khi vượt quá chiều rộng của box. "
+        "Bạn có thể dùng component này để hiển thị mô tả, log, help text "
+        "hoặc chat box đơn giản."
     )
 
-    tab = Tab(
-        tab_type="horizontial",
-        pos_tabpanel="left",
-        screen=screen,
-        style=style
+    style = StyleTextBox(
+        Surface=screen,
+        Content=content,
+        Pos=(120, 100),
+        Size=(500, 300),
+        Padding=15,
+        Border=2,
+        Border_radius=12,
+        Bg_color="#f0f0f0",
+        Border_color="#222222",
+        Color="#111111",
+        Line_height=6,
     )
 
-    while True:
-        screen.fill((30, 30, 30))
+    textbox = TextBox(style)
 
-        tab.update()
+    running = True
+
+    while running:
+        screen.fill((35, 35, 35))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        textbox.update()
 
         pygame.display.flip()
         clock.tick(60)
+
+    pygame.quit()
 
 
 if __name__ == "__main__":
