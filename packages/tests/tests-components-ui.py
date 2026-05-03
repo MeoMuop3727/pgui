@@ -30,20 +30,15 @@ class ScenceTest(Scence):
     def __init__(self, surface: pygame.Surface):
         super().__init__()
 
-        self.__surface = surface
 
-        self.a = Alert(self.__surface, StyleAlert(pos=(100,100), title="Info",
-                                                  content=""""Đây là nội dung cảnh báo.\n"
-            "Component Alert được tạo từ ButtonText + TextBox.\n"
-            "Nhấn nút X để đóng.""",
-            font=pygame.font.Font(None, 30),
-            padding=5,
-            border=10))       
-    
+
     def render(self, screen):
         screen.fill("#ffffff")
-        self.a.update()
-
+        self.i.update()
+    
+    def handle_event(self, events):
+        pass
+    
 manager.push_scence(ScenceTest(screen))
 
 manager.run() # python3 -m packages.tests.tests-components-ui
