@@ -30,9 +30,7 @@ class ScenceTest(Scence):
     def __init__(self, surface: pygame.Surface):
         super().__init__()
 
-        self.__surface = surface
-
-        
+        self.__surface = surface       
     
     def render(self, screen):
         screen.fill("#ffffff")

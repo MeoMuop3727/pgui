@@ -1,324 +1,235 @@
-from __future__ import annotations
-
 import pygame
-import numpy as np
 
 from dataclasses import dataclass
-from typing import Tuple, Union, List
+from typing import Optional, Callable, Literal
 
-# ==========================================================
-# INIT
-# ==========================================================
-pygame.init()
-
-# ==========================================================
-# TYPE
-# ==========================================================
-ColorType = Union[str, Tuple[int, int, int]]
-Vec2 = Tuple[int, int]
+from packages.utils.utils_typing import Vec2, ColorType
+from packages.utils.utils_transform import to_array, hex_to_rbg
 
 
 # ==========================================================
-# HELPER
+# STATE
 # ==========================================================
-def _to_color(value: ColorType) -> Tuple[int, int, int]:
-    """
-    Convert HEX hoặc RGB sang RGB tuple.
-    """
-    if isinstance(value, tuple):
-        return value
+class StateSwitch:
+    NORMAL = 1
+    HOVER = 2
+    PRESSED = 3
 
-    value = value.strip().replace("#", "")
-
-    if len(value) != 6:
-        raise ValueError("HEX color must be 6 characters.")
-
-    return tuple(int(value[i:i + 2], 16) for i in (0, 2, 4))
-
-
-def _np(value: Vec2) -> np.ndarray:
-    """
-    Convert tuple -> numpy ndarray
-    """
-    return np.array(value, dtype=np.int32)
-
-
-# ==========================================================
-# STYLE
-# ==========================================================
 @dataclass(slots=True)
-class StyleTextBox:
-    Surface: pygame.Surface
-    Content: str = ""
+class StyleSwitch:
+    # normal
+    track_color: ColorType = "#cccccc"
+    thumb_color: ColorType = "#333333"
 
-    Font: pygame.font.Font = pygame.font.Font(None, 25)
+    # pressed
+    track_color_pressed: ColorType = "#333333"
+    thumb_color_pressed: ColorType = "#cccccc"
 
-    Color: ColorType = "#333333"
-    Bg_color: ColorType = "#cccccc"
+    # hover
+    track_color_hover: ColorType = "#333333"
+    thumb_color_hover: ColorType = "#cccccc"
 
-    Antialias: bool = True
+    # active
+    track_color_active: ColorType = "#333333"
+    thumb_color_active: ColorType = "#cccccc"
 
-    Pos: Vec2 = (0, 0)
-    Size: Vec2 = (500, 400)
+    # general
+    border: int = 0
+    border_radius: int = 50
+    border_color: ColorType = "#000000"
 
-    Border: int = 0
-    Border_radius: int = 0
-    Border_color: ColorType = "#000000"
+    on_click: Optional[Callable[[bool], None]] = None
+    on_sound: Optional[pygame.mixer.Sound] = None
 
-    Padding: int = 0
-    Line_height: int = 0
+    size: Vec2 = (70, 36)
+    pos: Vec2 = (0, 0)
 
-    Visible: bool = True
+    state: Literal[0, 1] | bool = 0
 
 
 # ==========================================================
-# TEXTBOX
+# SWITCH
 # ==========================================================
-class TextBox:
-    """
-    TextBox hiển thị đoạn văn bản nhiều dòng có auto wrap text.
+class Switch:
+    def __init__(
+        self,
+        surface: pygame.Surface,
+        style: StyleSwitch
+    ) -> None:
 
-    Parameters
-    ----------
-    style : StyleTextBox
+        self.__surface: pygame.Surface = surface
+        self.__style: StyleSwitch = style
 
-        Surface:
-            nơi textbox được vẽ lên.
-
-        Content:
-            nội dung text cần hiển thị.
-
-        Font:
-            pygame.font.Font dùng để render chữ.
-
-        Color:
-            màu chữ (HEX hoặc RGB).
-
-        Bg_color:
-            màu nền textbox.
-
-        Antialias:
-            làm mượt chữ.
-
-        Pos:
-            vị trí textbox (x, y).
-
-        Size:
-            kích thước textbox (width, height).
-
-        Border:
-            độ dày border.
-
-        Border_radius:
-            bo góc textbox.
-
-        Border_color:
-            màu border.
-
-        Padding:
-            khoảng cách text với viền.
-
-        Line_height:
-            khoảng cách thêm giữa các dòng.
-
-        Visible:
-            có hiển thị hay không.
-    """
-
-    def __init__(self, style: StyleTextBox) -> None:
-        self.__surface: pygame.Surface = style.Surface
-        self.__style: StyleTextBox = style
+        self.__visual_state: int = StateSwitch.NORMAL
+        self.__pressed_lock: bool = False
 
     # ======================================================
     # PRIVATE
     # ======================================================
-    def __wrap_text_box(self) -> List[str]:
-        """
-        Trả về list dòng text đã wrap.
+    def __get_rect(self) -> pygame.Rect:
+        pos = to_array(self.__style.pos)
+        size = to_array(self.__style.size)
 
-        Điều kiện:
-        chiều rộng mỗi dòng không vượt quá width textbox.
-        """
-        content: str = self.__style.Content
-        font = self.__style.Font
-
-        width_limit = (
-            self.__style.Size[0] - self.__style.Padding * 2
-        )
-
-        words = content.split(" ")
-        lines: List[str] = []
-
-        current_line = ""
-
-        for word in words:
-            test_line = word if current_line == "" else current_line + " " + word
-
-            text_width = font.size(test_line)[0]
-
-            if text_width <= width_limit:
-                current_line = test_line
-            else:
-                if current_line:
-                    lines.append(current_line)
-                current_line = word
-
-        if current_line:
-            lines.append(current_line)
-
-        return lines
-
-    def __draw_bg(self) -> None:
-        """
-        Vẽ background textbox.
-        """
-        if not self.__style.Visible:
-            return
-
-        pos = _np(self.__style.Pos)
-        size = _np(self.__style.Size)
-
-        rect = pygame.Rect(
+        return pygame.Rect(
             int(pos[0]),
             int(pos[1]),
             int(size[0]),
-            int(size[1]),
+            int(size[1])
         )
+
+    def __get_state(self) -> bool:
+        return bool(self.__style.state)
+
+    def __get_track_color_state(self) -> tuple[int, int, int]:
+        active = self.__get_state()
+
+        if self.__visual_state == StateSwitch.PRESSED:
+            return hex_to_rbg(self.__style.track_color_pressed)
+
+        if self.__visual_state == StateSwitch.HOVER:
+            return hex_to_rbg(self.__style.track_color_hover)
+
+        if active:
+            return hex_to_rbg(self.__style.track_color_active)
+
+        return hex_to_rbg(self.__style.track_color)
+
+    def __get_thumb_color_state(self) -> tuple[int, int, int]:
+        active = self.__get_state()
+
+        if self.__visual_state == StateSwitch.PRESSED:
+            return hex_to_rbg(self.__style.thumb_color_pressed)
+
+        if self.__visual_state == StateSwitch.HOVER:
+            return hex_to_rbg(self.__style.thumb_color_hover)
+
+        if active:
+            return hex_to_rbg(self.__style.thumb_color_active)
+
+        return hex_to_rbg(self.__style.thumb_color)
+
+    def __draw_track(self) -> None:
+        rect = self.__get_rect()
 
         pygame.draw.rect(
             self.__surface,
-            _to_color(self.__style.Bg_color),
+            self.__get_track_color_state(),
             rect,
-            border_radius=self.__style.Border_radius,
+            border_radius=int(rect.height * self.__style.border_radius / 100)
+        )
+
+    def __draw_thumb(self) -> None:
+        rect = self.__get_rect()
+
+        pad = 4
+        thumb_size = rect.height - pad * 2
+
+        if self.__get_state():
+            x = rect.right - thumb_size - pad
+        else:
+            x = rect.left + pad
+
+        y = rect.top + pad
+
+        pygame.draw.circle(
+            self.__surface,
+            self.__get_thumb_color_state(),
+            (x + thumb_size // 2, y + thumb_size // 2),
+            thumb_size // 2
         )
 
     def __draw_border(self) -> None:
-        """
-        Vẽ border textbox.
-        """
-        if not self.__style.Visible:
+        if self.__style.border <= 0:
             return
 
-        if self.__style.Border <= 0:
-            return
-
-        pos = _np(self.__style.Pos)
-        size = _np(self.__style.Size)
-
-        rect = pygame.Rect(
-            int(pos[0]),
-            int(pos[1]),
-            int(size[0]),
-            int(size[1]),
-        )
+        rect = self.__get_rect()
 
         pygame.draw.rect(
             self.__surface,
-            _to_color(self.__style.Border_color),
+            hex_to_rbg(self.__style.border_color),
             rect,
-            width=self.__style.Border,
-            border_radius=self.__style.Border_radius,
+            width=self.__style.border,
+            border_radius=int(rect.height * self.__style.border_radius / 100)
         )
 
-    def __draw_text(self) -> None:
-        """
-        Vẽ text đã wrap lên textbox.
-        """
-        if not self.__style.Visible:
-            return
+    def __handle_event(self) -> None:
+        rect = self.__get_rect()
+        mouse = pygame.mouse.get_pos()
+        pressed = pygame.mouse.get_pressed()[0]
 
-        lines = self.__wrap_text_box()
+        inside = rect.collidepoint(mouse)
 
-        pos = _np(self.__style.Pos)
-        padding = self.__style.Padding
+        if inside:
+            if pressed:
+                self.__visual_state = StateSwitch.PRESSED
 
-        x = int(pos[0]) + padding
-        y = int(pos[1]) + padding
+                if not self.__pressed_lock:
+                    self.__pressed_lock = True
+                    self.__style.state = not bool(self.__style.state)
 
-        font = self.__style.Font
-        color = _to_color(self.__style.Color)
+                    if self.__style.on_sound:
+                        self.__style.on_sound.play()
 
-        line_step = font.get_height() + self.__style.Line_height
+                    if self.__style.on_click:
+                        self.__style.on_click(bool(self.__style.state))
 
-        max_height = self.__style.Size[1] - padding
+            else:
+                self.__pressed_lock = False
+                self.__visual_state = StateSwitch.HOVER
 
-        for line in lines:
-            if y + font.get_height() > int(pos[1]) + max_height:
-                break
-
-            text_surface = font.render(
-                line,
-                self.__style.Antialias,
-                color
-            )
-
-            self.__surface.blit(text_surface, (x, y))
-
-            y += line_step
+        else:
+            self.__pressed_lock = False
+            self.__visual_state = StateSwitch.NORMAL
 
     # ======================================================
     # PUBLIC
     # ======================================================
     def update(self) -> None:
-        """
-        Cập nhật textbox.
-        """
-        if not self.__style.Visible:
-            return
+        self.__handle_event()
 
-        self.__draw_bg()
+        self.__draw_track()
+        self.__draw_thumb()
         self.__draw_border()
-        self.__draw_text()
+
+    def get_state(self) -> bool:
+        return self.__get_state()
 
 
 # ==========================================================
 # DEMO
 # ==========================================================
-def main() -> None:
-    screen = pygame.display.set_mode((1000, 700))
-    pygame.display.set_caption("TextBox Demo")
+if __name__ == "__main__":
+    pygame.init()
 
+    screen = pygame.display.set_mode((800, 600))
     clock = pygame.time.Clock()
 
-    content = (
-        "Đây là TextBox dùng pygame + numpy. "
-        "Text sẽ tự động xuống dòng khi vượt quá chiều rộng của box. "
-        "Bạn có thể dùng component này để hiển thị mô tả, log, help text "
-        "hoặc chat box đơn giản."
+    def on_change(value: bool) -> None:
+        print("Switch:", value)
+
+    style = StyleSwitch(
+        pos=(300, 250),
+        size=(90, 44),
+        border=2,
+        border_color="#000000",
+        on_click=on_change,
+        state=0
     )
 
-    style = StyleTextBox(
-        Surface=screen,
-        Content=content,
-        Pos=(120, 100),
-        Size=(500, 300),
-        Padding=15,
-        Border=2,
-        Border_radius=12,
-        Bg_color="#f0f0f0",
-        Border_color="#222222",
-        Color="#111111",
-        Line_height=6,
-    )
-
-    textbox = TextBox(style)
+    switch = Switch(screen, style)
 
     running = True
 
     while running:
-        screen.fill((35, 35, 35))
+        screen.fill((240, 240, 240))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        textbox.update()
+        switch.update()
 
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
-
-
-if __name__ == "__main__":
-    main()

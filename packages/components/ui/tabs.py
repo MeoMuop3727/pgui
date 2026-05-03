@@ -35,7 +35,7 @@ from packages.utils.utils_typing import Vec2, ColorType
 from packages.utils.utils_transform import hex_to_rbg, to_array
 from .button import ButtonText, StyleButton
 
-@dataclass
+@dataclass(slots=True)
 class StyleTab:
 
     """

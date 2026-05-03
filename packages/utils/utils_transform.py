@@ -24,3 +24,5 @@ def hex_to_rbg(color: ColorType) -> RGB_COLOR:
 def to_array(value: Tuple[int]) -> NDArray:
     """Convert Tuple[int] -> NDArray"""
     return numpy.array(value, dtype=numpy.int32)
+
+

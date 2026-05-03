@@ -53,7 +53,7 @@ class StateButton(Enum):
     DISABLE = 3
     HOVER = 4
 
-@dataclass
+@dataclass(slots=True)
 class StyleButton:
 
     """
