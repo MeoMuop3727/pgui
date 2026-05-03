@@ -1,4 +1,4 @@
-from .utils_typing import ColorType, RGB_COLOR, Vec2
+from .utils_typing import ColorType, RGB_COLOR
 from numpy.typing import NDArray
 from typing import Tuple
 
@@ -21,7 +21,7 @@ def hex_to_rbg(color: ColorType) -> RGB_COLOR:
     
     raise ValueError("Invalid color format, the color must be ColorType")
 
-def to_array(value: Tuple[int]) -> NDArray:
+def to_array(value: Tuple[int | float]) -> NDArray:
     """Convert Tuple[int] -> NDArray"""
     return numpy.array(value, dtype=numpy.int32)
 

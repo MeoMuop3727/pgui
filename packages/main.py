@@ -1,71 +1,92 @@
 import pygame
+pygame.init()
 
 from dataclasses import dataclass
-from typing import Optional, Callable, Literal
+from typing import Optional, Literal
 
 from packages.utils.utils_typing import Vec2, ColorType
 from packages.utils.utils_transform import to_array, hex_to_rbg
+from packages.components.ui import (
+    ButtonText,
+    StyleButton,
+    TextBox,
+    StyleTextBox,
+)
 
 
 # ==========================================================
-# STATE
+# STYLE ALERT
 # ==========================================================
-class StateSwitch:
-    NORMAL = 1
-    HOVER = 2
-    PRESSED = 3
-
 @dataclass(slots=True)
-class StyleSwitch:
-    # normal
-    track_color: ColorType = "#cccccc"
-    thumb_color: ColorType = "#333333"
-
-    # pressed
-    track_color_pressed: ColorType = "#333333"
-    thumb_color_pressed: ColorType = "#cccccc"
-
-    # hover
-    track_color_hover: ColorType = "#333333"
-    thumb_color_hover: ColorType = "#cccccc"
-
-    # active
-    track_color_active: ColorType = "#333333"
-    thumb_color_active: ColorType = "#cccccc"
-
+class StyleAlert:
     # general
-    border: int = 0
-    border_radius: int = 50
-    border_color: ColorType = "#000000"
+    title: str = ""
+    title_color: ColorType = "#222222"
 
-    on_click: Optional[Callable[[bool], None]] = None
-    on_sound: Optional[pygame.mixer.Sound] = None
+    content: str = ""
+    text_color: ColorType = "#222222"
+    line_height: int = 0
 
-    size: Vec2 = (70, 36)
+    type: Literal["error", "warning", "info", "success"] = "info"
+
+    bg_title_color: Optional[ColorType] = None
+    bg_content_color: ColorType = "#f0f0f0"
+
+    size: Vec2 = (500, 300)
     pos: Vec2 = (0, 0)
 
-    state: Literal[0, 1] | bool = 0
+    border: int = 0
+    border_color: ColorType = "#000000"
+
+    padding: int = 0
+
+    per_height_title_frame: float = 0.25
+
+    # normal
+    button_color: ColorType = "#333333"
+    button_bg_color: ColorType = "#ffb3b3"
+
+    # pressed
+    button_color_pressed: ColorType = "#ffffff"
+    button_bg_color_pressed: ColorType = "#ff884d"
+
+    # hover
+    button_color_hover: ColorType = "#ffffff"
+    button_bg_color_hover: ColorType = "#ff884d"
 
 
 # ==========================================================
-# SWITCH
+# ALERT
 # ==========================================================
-class Switch:
+class Alert:
     def __init__(
         self,
         surface: pygame.Surface,
-        style: StyleSwitch
+        style: StyleAlert
     ) -> None:
 
         self.__surface: pygame.Surface = surface
-        self.__style: StyleSwitch = style
+        self.__style: StyleAlert = style
 
-        self.__visual_state: int = StateSwitch.NORMAL
-        self.__pressed_lock: bool = False
+        self.__visible: bool = True
+
+        self.__button_close = self.__create_button()
 
     # ======================================================
     # PRIVATE
     # ======================================================
+    def __get_type_color(self) -> tuple[int, int, int]:
+        if self.__style.type == "error":
+            return hex_to_rbg("#e74c3c")
+
+        if self.__style.type == "warning":
+            return hex_to_rbg("#f39c12")
+
+        if self.__style.type == "success":
+            return hex_to_rbg("#27ae60")
+
+        return hex_to_rbg("#3498db")  # info
+
     def __get_rect(self) -> pygame.Rect:
         pos = to_array(self.__style.pos)
         size = to_array(self.__style.size)
@@ -74,69 +95,132 @@ class Switch:
             int(pos[0]),
             int(pos[1]),
             int(size[0]),
-            int(size[1])
+            int(size[1]),
         )
 
-    def __get_state(self) -> bool:
-        return bool(self.__style.state)
-
-    def __get_track_color_state(self) -> tuple[int, int, int]:
-        active = self.__get_state()
-
-        if self.__visual_state == StateSwitch.PRESSED:
-            return hex_to_rbg(self.__style.track_color_pressed)
-
-        if self.__visual_state == StateSwitch.HOVER:
-            return hex_to_rbg(self.__style.track_color_hover)
-
-        if active:
-            return hex_to_rbg(self.__style.track_color_active)
-
-        return hex_to_rbg(self.__style.track_color)
-
-    def __get_thumb_color_state(self) -> tuple[int, int, int]:
-        active = self.__get_state()
-
-        if self.__visual_state == StateSwitch.PRESSED:
-            return hex_to_rbg(self.__style.thumb_color_pressed)
-
-        if self.__visual_state == StateSwitch.HOVER:
-            return hex_to_rbg(self.__style.thumb_color_hover)
-
-        if active:
-            return hex_to_rbg(self.__style.thumb_color_active)
-
-        return hex_to_rbg(self.__style.thumb_color)
-
-    def __draw_track(self) -> None:
+    def __create_button(self) -> ButtonText:
         rect = self.__get_rect()
+
+        title_h = int(rect.height * self.__style.per_height_title_frame)
+
+        button_size = (40, title_h - 10)
+
+        button_pos = (
+            rect.right - button_size[0] - 5,
+            rect.top + 5
+        )
+
+        style_btn = StyleButton(
+            content="X",
+            pos=button_pos,
+            size=button_size,
+            bg_color=self.__style.button_bg_color,
+            color=self.__style.button_color,
+
+            bg_color_hover=self.__style.button_bg_color_hover,
+            color_hover=self.__style.button_color_hover,
+
+            bg_color_pressed=self.__style.button_bg_color_pressed,
+            color_pressed=self.__style.button_color_pressed,
+
+            border=0,
+            border_radius=6,
+            on_click=self.__close_alert
+        )
+
+        return ButtonText(self.__surface, style_btn)
+
+    def __close_alert(self) -> None:
+        self.__visible = False
+
+    def __draw_title_frame(self) -> None:
+        rect = self.__get_rect()
+
+        title_h = int(rect.height * self.__style.per_height_title_frame)
+
+        title_rect = pygame.Rect(
+            rect.x,
+            rect.y,
+            rect.width,
+            title_h
+        )
+
+        color = (
+            hex_to_rbg(self.__style.bg_title_color)
+            if self.__style.bg_title_color
+            else self.__get_type_color()
+        )
 
         pygame.draw.rect(
             self.__surface,
-            self.__get_track_color_state(),
-            rect,
-            border_radius=int(rect.height * self.__style.border_radius / 100)
+            color,
+            title_rect
         )
 
-    def __draw_thumb(self) -> None:
+        font = pygame.font.Font(None, 28)
+
+        text = font.render(
+            self.__style.title,
+            True,
+            hex_to_rbg(self.__style.title_color)
+        )
+
+        text_rect = text.get_rect(
+            midleft=(title_rect.x + 10, title_rect.centery)
+        )
+
+        self.__surface.blit(text, text_rect)
+
+    def __draw_content_frame(self) -> pygame.Surface:
         rect = self.__get_rect()
 
-        pad = 4
-        thumb_size = rect.height - pad * 2
+        title_h = int(rect.height * self.__style.per_height_title_frame)
 
-        if self.__get_state():
-            x = rect.right - thumb_size - pad
-        else:
-            x = rect.left + pad
-
-        y = rect.top + pad
-
-        pygame.draw.circle(
-            self.__surface,
-            self.__get_thumb_color_state(),
-            (x + thumb_size // 2, y + thumb_size // 2),
-            thumb_size // 2
+        content_rect = pygame.Rect(
+            rect.x,
+            rect.y + title_h,
+            rect.width,
+            rect.height - title_h
         )
+
+        pygame.draw.rect(
+            self.__surface,
+            hex_to_rbg(self.__style.bg_content_color),
+            content_rect
+        )
+
+        return content_rect
+
+    def __draw_text_box(self) -> None:
+        rect = self.__get_rect()
+
+        title_h = int(rect.height * self.__style.per_height_title_frame)
+
+        padding = self.__style.padding
+
+        tb_pos = (
+            rect.x + padding,
+            rect.y + title_h + padding
+        )
+
+        tb_size = (
+            rect.width - padding * 2,
+            rect.height - title_h - padding * 2
+        )
+
+        style_tb = StyleTextBox(
+            content=self.__style.content,
+            pos=tb_pos,
+            size=tb_size,
+            padding=0,
+            border=0,
+            bg_color=self.__style.bg_content_color,
+            color=self.__style.text_color,
+            line_height=self.__style.line_height
+        )
+
+        textbox = TextBox(self.__surface, style_tb)
+        textbox.update()
 
     def __draw_border(self) -> None:
         if self.__style.border <= 0:
@@ -148,86 +232,60 @@ class Switch:
             self.__surface,
             hex_to_rbg(self.__style.border_color),
             rect,
-            width=self.__style.border,
-            border_radius=int(rect.height * self.__style.border_radius / 100)
+            width=self.__style.border
         )
-
-    def __handle_event(self) -> None:
-        rect = self.__get_rect()
-        mouse = pygame.mouse.get_pos()
-        pressed = pygame.mouse.get_pressed()[0]
-
-        inside = rect.collidepoint(mouse)
-
-        if inside:
-            if pressed:
-                self.__visual_state = StateSwitch.PRESSED
-
-                if not self.__pressed_lock:
-                    self.__pressed_lock = True
-                    self.__style.state = not bool(self.__style.state)
-
-                    if self.__style.on_sound:
-                        self.__style.on_sound.play()
-
-                    if self.__style.on_click:
-                        self.__style.on_click(bool(self.__style.state))
-
-            else:
-                self.__pressed_lock = False
-                self.__visual_state = StateSwitch.HOVER
-
-        else:
-            self.__pressed_lock = False
-            self.__visual_state = StateSwitch.NORMAL
 
     # ======================================================
     # PUBLIC
     # ======================================================
     def update(self) -> None:
-        self.__handle_event()
+        if not self.__visible:
+            return
 
-        self.__draw_track()
-        self.__draw_thumb()
+        self.__draw_title_frame()
+        self.__draw_content_frame()
+        self.__draw_text_box()
         self.__draw_border()
 
-    def get_state(self) -> bool:
-        return self.__get_state()
+        self.__button_close.update()
 
 
 # ==========================================================
 # DEMO
 # ==========================================================
 if __name__ == "__main__":
-    pygame.init()
 
-    screen = pygame.display.set_mode((800, 600))
+    screen = pygame.display.set_mode((1000, 700))
     clock = pygame.time.Clock()
 
-    def on_change(value: bool) -> None:
-        print("Switch:", value)
-
-    style = StyleSwitch(
-        pos=(300, 250),
-        size=(90, 44),
+    style = StyleAlert(
+        title="Thông Báo",
+        content=(
+            "Đây là nội dung cảnh báo.\n"
+            "Component Alert được tạo từ ButtonText + TextBox.\n"
+            "Nhấn nút X để đóng."
+        ),
+        type="warning",
+        pos=(250, 180),
+        size=(500, 280),
         border=2,
         border_color="#000000",
-        on_click=on_change,
-        state=0
+        padding=15,
+        line_height=5
     )
 
-    switch = Switch(screen, style)
+    alert = Alert(screen, style)
 
     running = True
 
     while running:
-        screen.fill((240, 240, 240))
+        screen.fill((30, 30, 30))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        switch.update()
+        alert.update()
 
         pygame.display.flip()
         clock.tick(60)
