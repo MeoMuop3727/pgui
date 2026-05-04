@@ -1,291 +1,295 @@
 import pygame
-pygame.init()
+import numpy as np
 
-from dataclasses import dataclass
-from typing import Optional, Literal
+from dataclasses import dataclass, field
+from typing import Optional, Callable, List
+from enum import Enum
 
 from packages.utils.utils_typing import Vec2, ColorType
 from packages.utils.utils_transform import to_array, hex_to_rbg
-from packages.components.ui import (
-    ButtonText,
-    StyleButton,
-    TextBox,
-    StyleTextBox,
-)
 
 
 # ==========================================================
-# STYLE ALERT
+# STATE
+# ==========================================================
+class StateCheckbox(Enum):
+    NORMAL = 1
+    HOVER = 2
+    PRESSED = 3
+
+
+# ==========================================================
+# STYLE
 # ==========================================================
 @dataclass(slots=True)
-class StyleAlert:
+class StyleCheckbox:
     # general
-    title: str = ""
-    title_color: ColorType = "#222222"
-
-    content: str = ""
-    text_color: ColorType = "#222222"
-    line_height: int = 0
-
-    type: Literal["error", "warning", "info", "success"] = "info"
-
-    bg_title_color: Optional[ColorType] = None
-    bg_content_color: ColorType = "#f0f0f0"
-
-    size: Vec2 = (500, 300)
+    label_list: List[str] = field(default_factory=list)
+    size: Vec2 = (200, 40)
     pos: Vec2 = (0, 0)
 
-    border: int = 0
-    border_color: ColorType = "#000000"
+    border: int = 1
+    border_radius: int = 0
+    border_color: ColorType = "#aaaaaa"
 
-    padding: int = 0
+    padding: int = 4
+    gap: int = 8
+    line_height: int = 5
 
-    per_height_title_frame: float = 0.25
+    font: pygame.font.Font = field(
+        default_factory=lambda: pygame.font.Font(None, 25)
+    )
+
+    antialias: bool = True
+    visible: bool = True
+
+    checked_list: List[int] = field(default_factory=list)
+
+    on_change: Optional[Callable[[List[bool]], None]] = None
+    on_sound: Optional[pygame.mixer.Sound] = None
 
     # normal
-    button_color: ColorType = "#333333"
-    button_bg_color: ColorType = "#ffb3b3"
-
-    # pressed
-    button_color_pressed: ColorType = "#ffffff"
-    button_bg_color_pressed: ColorType = "#ff884d"
+    bg_color: ColorType = "#ffffff"
+    check_color: ColorType = "#333333"
+    border_color: ColorType = "#aaaaaa"
+    label_color: ColorType = "#222222"
 
     # hover
-    button_color_hover: ColorType = "#ffffff"
-    button_bg_color_hover: ColorType = "#ff884d"
+    bg_color_hover: ColorType = "#f0f0f0"
+    border_color_hover: ColorType = "#888888"
+    label_color_hover: ColorType = "#222222"
+
+    # pressed
+    bg_color_pressed: ColorType = "#e0e0e0"
+    border_color_pressed: ColorType = "#555555"
+    label_color_pressed: ColorType = "#222222"
+
+    # checked
+    bg_color_checked: ColorType = "#4caf50"
+    border_color_checked: ColorType = "#388e3c"
+    label_color_checked: ColorType = "#222222"
 
 
 # ==========================================================
-# ALERT
+# CHECKBOX
 # ==========================================================
-class Alert:
-    def __init__(
-        self,
-        surface: pygame.Surface,
-        style: StyleAlert
-    ) -> None:
-
+class Checkbox:
+    def __init__(self, surface: pygame.Surface, style: StyleCheckbox):
         self.__surface: pygame.Surface = surface
-        self.__style: StyleAlert = style
+        self.__style: StyleCheckbox = style
 
-        self.__visible: bool = True
+        self.__states: List[int] = [
+            1 if i in style.checked_list else 0
+            for i in range(len(style.label_list))
+        ]
 
-        self.__button_close = self.__create_button()
+        self.__hover_index: int = -1
+        self.__pressed_index: int = -1
 
     # ======================================================
     # PRIVATE
     # ======================================================
-    def __get_type_color(self) -> tuple[int, int, int]:
-        if self.__style.type == "error":
-            return hex_to_rbg("#e74c3c")
+    def __get_visual_state(self, index: int) -> StateCheckbox:
+        if index == self.__pressed_index:
+            return StateCheckbox.PRESSED
 
-        if self.__style.type == "warning":
-            return hex_to_rbg("#f39c12")
+        if index == self.__hover_index:
+            return StateCheckbox.HOVER
 
-        if self.__style.type == "success":
-            return hex_to_rbg("#27ae60")
+        return StateCheckbox.NORMAL
 
-        return hex_to_rbg("#3498db")  # info
+    def __get_bg_color_state(self, state: StateCheckbox, checked: bool):
+        if checked:
+            return hex_to_rbg(self.__style.bg_color_checked)
 
-    def __get_rect(self) -> pygame.Rect:
-        pos = to_array(self.__style.pos)
-        size = to_array(self.__style.size)
+        if state == StateCheckbox.PRESSED:
+            return hex_to_rbg(self.__style.bg_color_pressed)
 
-        return pygame.Rect(
-            int(pos[0]),
-            int(pos[1]),
-            int(size[0]),
-            int(size[1]),
-        )
+        if state == StateCheckbox.HOVER:
+            return hex_to_rbg(self.__style.bg_color_hover)
 
-    def __create_button(self) -> ButtonText:
-        rect = self.__get_rect()
+        return hex_to_rbg(self.__style.bg_color)
 
-        title_h = int(rect.height * self.__style.per_height_title_frame)
+    def __get_border_color_state(self, state: StateCheckbox, checked: bool):
+        if checked:
+            return hex_to_rbg(self.__style.border_color_checked)
 
-        button_size = (40, title_h - 10)
+        if state == StateCheckbox.PRESSED:
+            return hex_to_rbg(self.__style.border_color_pressed)
 
-        button_pos = (
-            rect.right - button_size[0] - 5,
-            rect.top + 5
-        )
+        if state == StateCheckbox.HOVER:
+            return hex_to_rbg(self.__style.border_color_hover)
 
-        style_btn = StyleButton(
-            content="X",
-            pos=button_pos,
-            size=button_size,
-            bg_color=self.__style.button_bg_color,
-            color=self.__style.button_color,
+        return hex_to_rbg(self.__style.border_color)
 
-            bg_color_hover=self.__style.button_bg_color_hover,
-            color_hover=self.__style.button_color_hover,
+    def __get_check_color_state(self):
+        return hex_to_rbg(self.__style.check_color)
 
-            bg_color_pressed=self.__style.button_bg_color_pressed,
-            color_pressed=self.__style.button_color_pressed,
-
-            border=0,
-            border_radius=6,
-            on_click=self.__close_alert
-        )
-
-        return ButtonText(self.__surface, style_btn)
-
-    def __close_alert(self) -> None:
-        self.__visible = False
-
-    def __draw_title_frame(self) -> None:
-        rect = self.__get_rect()
-
-        title_h = int(rect.height * self.__style.per_height_title_frame)
-
-        title_rect = pygame.Rect(
-            rect.x,
-            rect.y,
-            rect.width,
-            title_h
-        )
-
-        color = (
-            hex_to_rbg(self.__style.bg_title_color)
-            if self.__style.bg_title_color
-            else self.__get_type_color()
-        )
-
+    def __draw_box(self, rect: pygame.Rect, color):
         pygame.draw.rect(
             self.__surface,
             color,
-            title_rect
-        )
-
-        font = pygame.font.Font(None, 28)
-
-        text = font.render(
-            self.__style.title,
-            True,
-            hex_to_rbg(self.__style.title_color)
-        )
-
-        text_rect = text.get_rect(
-            midleft=(title_rect.x + 10, title_rect.centery)
-        )
-
-        self.__surface.blit(text, text_rect)
-
-    def __draw_content_frame(self) -> pygame.Surface:
-        rect = self.__get_rect()
-
-        title_h = int(rect.height * self.__style.per_height_title_frame)
-
-        content_rect = pygame.Rect(
-            rect.x,
-            rect.y + title_h,
-            rect.width,
-            rect.height - title_h
-        )
-
-        pygame.draw.rect(
-            self.__surface,
-            hex_to_rbg(self.__style.bg_content_color),
-            content_rect
-        )
-
-        return content_rect
-
-    def __draw_text_box(self) -> None:
-        rect = self.__get_rect()
-
-        title_h = int(rect.height * self.__style.per_height_title_frame)
-
-        padding = self.__style.padding
-
-        tb_pos = (
-            rect.x + padding,
-            rect.y + title_h + padding
-        )
-
-        tb_size = (
-            rect.width - padding * 2,
-            rect.height - title_h - padding * 2
-        )
-
-        style_tb = StyleTextBox(
-            content=self.__style.content,
-            pos=tb_pos,
-            size=tb_size,
-            padding=0,
-            border=0,
-            bg_color=self.__style.bg_content_color,
-            color=self.__style.text_color,
-            line_height=self.__style.line_height
-        )
-
-        textbox = TextBox(self.__surface, style_tb)
-        textbox.update()
-
-    def __draw_border(self) -> None:
-        if self.__style.border <= 0:
-            return
-
-        rect = self.__get_rect()
-
-        pygame.draw.rect(
-            self.__surface,
-            hex_to_rbg(self.__style.border_color),
             rect,
-            width=self.__style.border
+            border_radius=self.__style.border_radius
         )
+
+    def __draw_border(self, rect: pygame.Rect, color):
+        pygame.draw.rect(
+            self.__surface,
+            color,
+            rect,
+            width=self.__style.border,
+            border_radius=self.__style.border_radius
+        )
+
+    def __draw_checkmark(self, rect: pygame.Rect):
+        pad = 6
+        p1 = (rect.left + pad, rect.centery)
+        p2 = (rect.centerx, rect.bottom - pad)
+        p3 = (rect.right - pad, rect.top + pad)
+
+        pygame.draw.lines(
+            self.__surface,
+            self.__get_check_color_state(),
+            False,
+            [p1, p2, p3],
+            3
+        )
+
+    def __draw_label(self, text: str, pos: Vec2, color):
+        surf = self.__style.font.render(
+            text,
+            self.__style.antialias,
+            color
+        )
+        self.__surface.blit(surf, pos)
+
+    def __handle_event(self, rects: List[pygame.Rect]):
+        mouse = pygame.mouse.get_pos()
+        pressed = pygame.mouse.get_pressed()[0]
+
+        self.__hover_index = -1
+
+        for i, rect in enumerate(rects):
+            if rect.collidepoint(mouse):
+                self.__hover_index = i
+
+                if pressed:
+                    self.__pressed_index = i
+                else:
+                    if self.__pressed_index == i:
+                        self.__states[i] = 0 if self.__states[i] else 1
+
+                        if self.__style.on_sound:
+                            self.__style.on_sound.play()
+
+                        if self.__style.on_change:
+                            self.__style.on_change(
+                                [bool(s) for s in self.__states]
+                            )
+
+                    self.__pressed_index = -1
+
+                return
+
+        self.__pressed_index = -1
 
     # ======================================================
     # PUBLIC
     # ======================================================
-    def update(self) -> None:
-        if not self.__visible:
+    def update(self):
+        if not self.__style.visible:
             return
 
-        self.__draw_title_frame()
-        self.__draw_content_frame()
-        self.__draw_text_box()
-        self.__draw_border()
+        base_pos = to_array(self.__style.pos)
+        size = to_array(self.__style.size)
 
-        self.__button_close.update()
+        box_size = size[1] - self.__style.padding * 2
+
+        rects: List[pygame.Rect] = []
+
+        for i, label in enumerate(self.__style.label_list):
+            offset = np.array([0, i * (size[1] + self.__style.line_height)])
+
+            pos = base_pos + offset + self.__style.padding
+
+            rect = pygame.Rect(
+                int(pos[0]),
+                int(pos[1]),
+                int(box_size),
+                int(box_size)
+            )
+
+            rects.append(rect)
+
+        self.__handle_event(rects)
+
+        for i, label in enumerate(self.__style.label_list):
+            rect = rects[i]
+
+            checked = bool(self.__states[i])
+            state = self.__get_visual_state(i)
+
+            bg = self.__get_bg_color_state(state, checked)
+            border = self.__get_border_color_state(state, checked)
+
+            if checked:
+                label_color = hex_to_rbg(self.__style.label_color_checked)
+            elif state == StateCheckbox.HOVER:
+                label_color = hex_to_rbg(self.__style.label_color_hover)
+            elif state == StateCheckbox.PRESSED:
+                label_color = hex_to_rbg(self.__style.label_color_pressed)
+            else:
+                label_color = hex_to_rbg(self.__style.label_color)
+
+            self.__draw_box(rect, bg)
+            self.__draw_border(rect, border)
+
+            if checked:
+                self.__draw_checkmark(rect)
+
+            label_pos = (
+                rect.right + self.__style.gap,
+                rect.top
+            )
+
+            self.__draw_label(label, label_pos, label_color)
+
+    def get_checked(self) -> List[bool]:
+        return [bool(s) for s in self.__states]
 
 
 # ==========================================================
 # DEMO
 # ==========================================================
 if __name__ == "__main__":
+    pygame.init()
 
-    screen = pygame.display.set_mode((1000, 700))
+    screen = pygame.display.set_mode((800, 600))
     clock = pygame.time.Clock()
 
-    style = StyleAlert(
-        title="Thông Báo",
-        content=(
-            "Đây là nội dung cảnh báo.\n"
-            "Component Alert được tạo từ ButtonText + TextBox.\n"
-            "Nhấn nút X để đóng."
-        ),
-        type="warning",
-        pos=(250, 180),
-        size=(500, 280),
-        border=2,
-        border_color="#000000",
-        padding=15,
-        line_height=5
+    def on_change(states):
+        print(states)
+
+    style = StyleCheckbox(
+        label_list=["Option A", "Option B", "Option C"],
+        pos=(100, 100),
+        checked_list=[1],
+        on_change=on_change
     )
 
-    alert = Alert(screen, style)
+    checkbox = Checkbox(screen, style)
 
     running = True
 
     while running:
-        screen.fill((30, 30, 30))
+        screen.fill((240, 240, 240))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-        alert.update()
+        checkbox.update()
 
         pygame.display.flip()
         clock.tick(60)

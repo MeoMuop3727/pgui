@@ -30,11 +30,10 @@ class ScenceTest(Scence):
     def __init__(self, surface: pygame.Surface):
         super().__init__()
 
-
+        
 
     def render(self, screen):
         screen.fill("#ffffff")
-        self.i.update()
     
     def handle_event(self, events):
         pass
