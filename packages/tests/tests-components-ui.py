@@ -31,8 +31,9 @@ class ScenceTest(Scence):
         super().__init__()
 
 
+
     def render(self, screen):
-        screen.fill("#000000")
+        screen.fill("#ffffff")
     
     def handle_event(self, events):
         pass

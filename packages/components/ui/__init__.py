@@ -8,6 +8,7 @@ from .checkbox import StyleCheckBox, CheckBox, CheckBoxList
 from .radio import StyleRadioButton, RadioButton, RadioButtonList
 from .dropdown import StyleDropdown, Dropdown
 from .slider import StyleSlider, Slider
+from .label import StyleLabel, Label
 
 __all__ = [
     "Button", "ButtonText", "ButtonImage", "StyleButton",
@@ -19,5 +20,6 @@ __all__ = [
     "StyleCheckBox", "CheckBox", "CheckBoxList",
     "StyleRadioButton", "RadioButton", "RadioButtonList",
     "StyleDropdown", "Dropdown",
-    "StyleSlider", "Slider"
+    "StyleSlider", "Slider",
+    "StyleLabel", "Label"
 ]
