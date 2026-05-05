@@ -7,6 +7,7 @@ from .input import StyleInput, Input
 from .checkbox import StyleCheckBox, CheckBox, CheckBoxList
 from .radio import StyleRadioButton, RadioButton, RadioButtonList
 from .dropdown import StyleDropdown, Dropdown
+from .slider import StyleSlider, Slider
 
 __all__ = [
     "Button", "ButtonText", "ButtonImage", "StyleButton",
@@ -17,5 +18,6 @@ __all__ = [
     "StyleInput", "Input",
     "StyleCheckBox", "CheckBox", "CheckBoxList",
     "StyleRadioButton", "RadioButton", "RadioButtonList",
-    "StyleDropdown", "Dropdown"
+    "StyleDropdown", "Dropdown",
+    "StyleSlider", "Slider"
 ]

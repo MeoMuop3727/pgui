@@ -30,14 +30,13 @@ class ScenceTest(Scence):
     def __init__(self, surface: pygame.Surface):
         super().__init__()
 
-        
 
     def render(self, screen):
-        screen.fill("#ffffff")
+        screen.fill("#000000")
     
     def handle_event(self, events):
         pass
-    
+
 manager.push_scence(ScenceTest(screen))
 
 manager.run() # python3 -m packages.tests.tests-components-ui

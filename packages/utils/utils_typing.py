@@ -6,3 +6,4 @@ ColorType = Union[HEX_COLOR, RGB_COLOR]
 
 Vec2 = Tuple[int,int]
 
+Number = Union[int, float]
