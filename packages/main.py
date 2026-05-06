@@ -1,8 +1,9 @@
 import pygame
 import numpy as np
 
-from dataclasses import dataclass, field
-from typing import Literal
+from dataclasses import dataclass
+from typing import Callable, List, Optional
+
 from packages.utils.utils_typing import Vec2, ColorType
 from packages.utils.utils_transform import to_array, hex_to_rbg
 
@@ -11,119 +12,171 @@ from packages.utils.utils_transform import to_array, hex_to_rbg
 # STYLE
 # ==========================================================
 @dataclass(slots=True)
-class StyleTooltip:
-    content: str = ""
-    placement: Literal["top", "bottom", "left", "right"] = "top"
-    offset: Vec2 = (0, 0)
+class StyleGrid:
+    rows: int = 3
+    cols: int = 3
 
-    delay: float = 0.5
-    size: Vec2 = (150, 35)
+    pos: Vec2 = (0, 0)
+    size: Vec2 = (500, 500)
 
-    visible: bool = True
+    gap_row: int = 4
+    gap_col: int = 4
 
-    # bg
-    bg_color: ColorType = "#222222"
+    padding: tuple[int, int, int, int] = (0, 0, 0, 0)  # top right bottom left
+
     border: int = 0
     border_color: ColorType = "#000000"
-    border_radius: int = 6
+    border_radius: int = 0
 
-    # text
-    color: ColorType = "#ffffff"
-    font: pygame.font.Font = field(
-        default_factory=lambda: pygame.font.Font(None, 20)
-    )
-    antialias: bool = True
-    padding: int = 8
+    cell_border: int = 0
+    cell_border_color: ColorType = "#cccccc"
+    cell_border_radius: int = 0
+    cell_bg_color: ColorType = "#ffffff"
 
-    # arrow
-    show_arrow: bool = True
-    arrow_size: Vec2 = (8, 6)
-    arrow_color: ColorType = "#222222"
+    bg_color: ColorType = "#f0f0f0"
+    visible: bool = True
 
 
 # ==========================================================
-# TOOLTIP
+# CELL
 # ==========================================================
-class Tooltip:
+class GridCell:
     def __init__(
         self,
         surface: pygame.Surface,
-        style: StyleTooltip,
-        anchor_rect: pygame.Rect
+        rect: pygame.Rect,
+        style: StyleGrid,
+        render_func: Optional[Callable[[pygame.Surface], None]] = None
     ):
         self.__surface = surface
+        self.__rect = rect
         self.__style = style
-        self.__anchor_rect = anchor_rect
+        self.__render_func = render_func
 
-        self.__rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
-
-        self.__is_visible: bool = False
-        self.__hover_timer: int = 0
-
-        self.__content: str = style.content
-
-    # ======================================================
-    # PRIVATE
-    # ======================================================
-    def __handle_hover(self):
-        mouse = pygame.mouse.get_pos()
-        now = pygame.time.get_ticks()
-
-        if self.__anchor_rect.collidepoint(mouse):
-            if self.__hover_timer == 0:
-                self.__hover_timer = now
-
-            elapsed = (now - self.__hover_timer) / 1000.0
-            self.__is_visible = elapsed >= self.__style.delay
-        else:
-            self.__hover_timer = 0
-            self.__is_visible = False
-
-    def __calc_pos(self) -> np.ndarray:
-        anchor = self.__anchor_rect
-        size = to_array(self.__style.size)
-        offset = to_array(self.__style.offset)
-
-        if self.__style.placement == "top":
-            base = np.array((anchor.centerx - size[0] / 2,
-                             anchor.top - size[1]))
-
-        elif self.__style.placement == "bottom":
-            base = np.array((anchor.centerx - size[0] / 2,
-                             anchor.bottom))
-
-        elif self.__style.placement == "left":
-            base = np.array((anchor.left - size[0],
-                             anchor.centery - size[1] / 2))
-
-        else:  # right
-            base = np.array((anchor.right,
-                             anchor.centery - size[1] / 2))
-
-        pos = base + offset
-
-        # clamp vào màn hình
-        screen_w, screen_h = self.__surface.get_size()
-
-        pos[0] = max(0, min(screen_w - size[0], pos[0]))
-        pos[1] = max(0, min(screen_h - size[1], pos[1]))
-
-        return pos
-
-    def __build_rect(self) -> pygame.Rect:
-        pos = self.__calc_pos()
-        size = to_array(self.__style.size)
-
-        return pygame.Rect(
-            int(pos[0]), int(pos[1]),
-            int(size[0]), int(size[1])
-        )
-
+    # ---------------- PRIVATE ----------------
     def __draw_bg(self):
         pygame.draw.rect(
             self.__surface,
-            hex_to_rbg(self.__style.bg_color),
+            hex_to_rbg(self.__style.cell_bg_color),
             self.__rect,
+            border_radius=self.__style.cell_border_radius
+        )
+
+    def __draw_border(self):
+        if self.__style.cell_border <= 0:
+            return
+
+        pygame.draw.rect(
+            self.__surface,
+            hex_to_rbg(self.__style.cell_border_color),
+            self.__rect,
+            width=self.__style.cell_border,
+            border_radius=self.__style.cell_border_radius
+        )
+
+    def __draw_content(self):
+        if not self.__render_func:
+            return
+
+        sub = self.__surface.subsurface(self.__rect)
+        self.__render_func(sub)
+
+    # ---------------- PUBLIC ----------------
+    def update(self):
+        self.__draw_bg()
+        self.__draw_border()
+        self.__draw_content()
+
+    def get_surface(self) -> pygame.Surface:
+        return self.__surface.subsurface(self.__rect)
+
+    def set_render(self, func: Callable[[pygame.Surface], None]):
+        self.__render_func = func
+
+
+# ==========================================================
+# GRID
+# ==========================================================
+class Grid:
+    def __init__(self, surface: pygame.Surface, style: StyleGrid):
+        self.__surface = surface
+        self.__style = style
+
+        self.__cells: List[List[GridCell]] = []
+        self.__cell_size = np.array((0, 0))
+
+        self.__create_cells()
+
+    # ---------------- PRIVATE ----------------
+    def __calc_cell_size(self) -> np.ndarray:
+        size = to_array(self.__style.size)
+        padding = np.array(self.__style.padding)  # top right bottom left
+
+        inner_w = size[0] - padding[1] - padding[3]
+        inner_h = size[1] - padding[0] - padding[2]
+
+        total_gap_w = (self.__style.cols - 1) * self.__style.gap_col
+        total_gap_h = (self.__style.rows - 1) * self.__style.gap_row
+
+        cell_w = (inner_w - total_gap_w) / self.__style.cols
+        cell_h = (inner_h - total_gap_h) / self.__style.rows
+
+        return np.array((cell_w, cell_h))
+
+    def __calc_cell_pos(self, row: int, col: int) -> np.ndarray:
+        base = to_array(self.__style.pos)
+        padding = np.array(self.__style.padding)
+
+        cell_size = self.__cell_size
+
+        x = (
+            base[0]
+            + padding[3]
+            + col * (cell_size[0] + self.__style.gap_col)
+        )
+
+        y = (
+            base[1]
+            + padding[0]
+            + row * (cell_size[1] + self.__style.gap_row)
+        )
+
+        return np.array((x, y))
+
+    def __create_cells(self):
+        self.__cells.clear()
+        self.__cell_size = self.__calc_cell_size()
+
+        for r in range(self.__style.rows):
+            row_cells = []
+            for c in range(self.__style.cols):
+                pos = self.__calc_cell_pos(r, c)
+
+                rect = pygame.Rect(
+                    int(pos[0]),
+                    int(pos[1]),
+                    int(self.__cell_size[0]),
+                    int(self.__cell_size[1])
+                )
+
+                row_cells.append(
+                    GridCell(self.__surface, rect, self.__style)
+                )
+
+            self.__cells.append(row_cells)
+
+    def __draw_bg(self):
+        rect = pygame.Rect(
+            int(self.__style.pos[0]),
+            int(self.__style.pos[1]),
+            int(self.__style.size[0]),
+            int(self.__style.size[1])
+        )
+
+        pygame.draw.rect(
+            self.__surface,
+            hex_to_rbg(self.__style.bg_color),
+            rect,
             border_radius=self.__style.border_radius
         )
 
@@ -131,159 +184,91 @@ class Tooltip:
         if self.__style.border <= 0:
             return
 
+        rect = pygame.Rect(
+            int(self.__style.pos[0]),
+            int(self.__style.pos[1]),
+            int(self.__style.size[0]),
+            int(self.__style.size[1])
+        )
+
         pygame.draw.rect(
             self.__surface,
             hex_to_rbg(self.__style.border_color),
-            self.__rect,
+            rect,
             width=self.__style.border,
             border_radius=self.__style.border_radius
         )
 
-    def __wrap_text(self, text: str) -> list[str]:
-        words = text.split(" ")
-        lines = []
+    def __draw_cells(self):
+        for row in self.__cells:
+            for cell in row:
+                cell.update()
 
-        max_width = self.__rect.width - self.__style.padding * 2
-
-        current = ""
-
-        for word in words:
-            test = current + (" " if current else "") + word
-            surf = self.__style.font.render(test, True, (0, 0, 0))
-
-            if surf.get_width() <= max_width:
-                current = test
-            else:
-                lines.append(current)
-                current = word
-
-        if current:
-            lines.append(current)
-
-        return lines
-
-    def __draw_content(self):
-        lines = self.__wrap_text(self.__content)
-
-        y = self.__rect.top + self.__style.padding
-
-        for line in lines:
-            surf = self.__style.font.render(
-                line,
-                self.__style.antialias,
-                hex_to_rbg(self.__style.color)
-            )
-
-            x = self.__rect.left + self.__style.padding
-
-            self.__surface.blit(surf, (x, y))
-
-            y += surf.get_height()
-
-    def __draw_arrow(self):
-        if not self.__style.show_arrow:
-            return
-
-        base, height = self.__style.arrow_size
-        rect = self.__rect
-        anchor = self.__anchor_rect
-
-        color = hex_to_rbg(self.__style.arrow_color)
-
-        if self.__style.placement == "top":
-            tip = (anchor.centerx, anchor.top)
-            points = [
-                (tip[0] - base, rect.bottom),
-                (tip[0] + base, rect.bottom),
-                (tip[0], rect.bottom + height)
-            ]
-
-        elif self.__style.placement == "bottom":
-            tip = (anchor.centerx, anchor.bottom)
-            points = [
-                (tip[0] - base, rect.top),
-                (tip[0] + base, rect.top),
-                (tip[0], rect.top - height)
-            ]
-
-        elif self.__style.placement == "left":
-            tip = (anchor.left, anchor.centery)
-            points = [
-                (rect.right, tip[1] - base),
-                (rect.right, tip[1] + base),
-                (rect.right + height, tip[1])
-            ]
-
-        else:  # right
-            tip = (anchor.right, anchor.centery)
-            points = [
-                (rect.left, tip[1] - base),
-                (rect.left, tip[1] + base),
-                (rect.left - height, tip[1])
-            ]
-
-        pygame.draw.polygon(self.__surface, color, points)
-
-    # ======================================================
-    # PUBLIC
-    # ======================================================
+    # ---------------- PUBLIC ----------------
     def update(self):
         if not self.__style.visible:
             return
 
-        self.__handle_hover()
-
-        if not self.__is_visible:
-            return
-
-        self.__rect = self.__build_rect()
-
         self.__draw_bg()
         self.__draw_border()
-        self.__draw_content()
-        self.__draw_arrow()
+        self.__draw_cells()
 
-    @property
-    def content(self) -> str:
-        return self.__content
+    def get_cell(self, row: int, col: int) -> GridCell:
+        return self.__cells[row][col]
 
-    @content.setter
-    def content(self, value: str):
-        self.__content = value
+    def set_cell_content(self, row: int, col: int, func: Callable[[pygame.Surface], None]):
+        self.__cells[row][col].set_render(func)
 
-
-# ==========================================================
-# DEMO
-# ==========================================================
-if __name__ == "__main__":
+    def get_cell_surface(self, row: int, col: int) -> pygame.Surface:
+        return self.__cells[row][col].get_surface()
+    
+def main():
     pygame.init()
 
     screen = pygame.display.set_mode((800, 600))
     clock = pygame.time.Clock()
 
-    anchor = pygame.Rect(350, 250, 100, 60)
-
-    style = StyleTooltip(
-        content="This is a tooltip with wrapping text example",
-        placement="top",
-        size=(180, 60)
+    style = StyleGrid(
+        rows=3,
+        cols=3,
+        pos=(150, 50),
+        size=(500, 500),
+        padding=(10, 10, 10, 10),
+        gap_row=5,
+        gap_col=5,
+        cell_border=1
     )
 
-    tooltip = Tooltip(screen, style, anchor)
+    grid = Grid(screen, style)
+
+    # demo content
+    def make_cell_text(text):
+        def render(surface):
+            font = pygame.font.Font(None, 30)
+            txt = font.render(text, True, (0, 0, 0))
+            rect = txt.get_rect(center=surface.get_rect().center)
+            surface.blit(txt, rect)
+        return render
+
+    for r in range(3):
+        for c in range(3):
+            grid.set_cell_content(r, c, make_cell_text(f"{r},{c}"))
 
     running = True
     while running:
-        screen.fill("#ffffff")
+        screen.fill((30, 30, 30))
 
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 running = False
 
-        pygame.draw.rect(screen, (70, 70, 70), anchor)
-
-        tooltip.update()
+        grid.update()
 
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
+
+
+if __name__ == "__main__":
+    main()

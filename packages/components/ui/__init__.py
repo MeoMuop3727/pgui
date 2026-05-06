@@ -11,6 +11,7 @@ from .slider import StyleSlider, Slider
 from .label import StyleLabel, Label
 from .image import StyleImage, Image
 from .panel import StylePanel, Panel
+from .grid import StyleGrid, Grid
 
 __all__ = [
     "Button", "ButtonText", "ButtonImage", "StyleButton",
@@ -25,5 +26,6 @@ __all__ = [
     "StyleSlider", "Slider",
     "StyleLabel", "Label",
     "StyleImage", "Image",
-    "StylePanel", "Panel"
+    "StylePanel", "Panel",
+    "StyleGrid", "Grid"
 ]

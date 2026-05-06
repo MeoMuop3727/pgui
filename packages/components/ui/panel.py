@@ -124,7 +124,8 @@ class Panel:
     
     def __init__(self,
                  surface: pygame.Surface,
-                 style: StylePanel):
+                 style: StylePanel,
+                 objects: list = []):
         self.__surface = surface
         self.__style = style
 
@@ -132,7 +133,7 @@ class Panel:
 
         self.__subrect = self.__surface.subsurface(self.__rect)
 
-        self.objects: list = []
+        self.objects: list = objects
     
     def update(self) -> None:
         if self.__style.visible:
