@@ -29,7 +29,6 @@ Typical usage:
 import pygame
 
 from dataclasses import dataclass
-from typing import List
 from packages.utils.utils_typing import Vec2, ColorType
 
 from packages.utils.utils_transform import to_array, hex_to_rbg

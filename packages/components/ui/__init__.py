@@ -9,6 +9,7 @@ from .radio import StyleRadioButton, RadioButton, RadioButtonList
 from .dropdown import StyleDropdown, Dropdown
 from .slider import StyleSlider, Slider
 from .label import StyleLabel, Label
+from .image import StyleImage, Image
 
 __all__ = [
     "Button", "ButtonText", "ButtonImage", "StyleButton",
@@ -21,5 +22,6 @@ __all__ = [
     "StyleRadioButton", "RadioButton", "RadioButtonList",
     "StyleDropdown", "Dropdown",
     "StyleSlider", "Slider",
-    "StyleLabel", "Label"
+    "StyleLabel", "Label",
+    "StyleImage", "Image"
 ]
