@@ -106,6 +106,8 @@ class Panel:
     update() -> None
         Draws the border, background, and all registered child objects each frame.
         Does nothing if ``StylePanel.visible`` is False.
+    get_subsurface(self) -> pygame.Surface
+        Return the surface which will be used to draw the objects
 
     Example
     -------
@@ -140,6 +142,9 @@ class Panel:
             self.__draw_border()
             self.__draw_bg()
             self.__draw_objects()
+    
+    def get_subsurface(self) -> pygame.Surface:
+        return self.__subrect
 
     def __draw_bg(self) -> None:
         bg = self.__rect

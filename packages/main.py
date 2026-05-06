@@ -2,257 +2,270 @@ import pygame
 import numpy as np
 
 from dataclasses import dataclass
-from typing import Callable, List, Optional
+from typing import Callable, Optional, Literal, List, Tuple, Union
 
-from packages.utils.utils_typing import Vec2, ColorType
-from packages.utils.utils_transform import to_array, hex_to_rbg
+# ==========================================================
+# TYPE + UTILS (self-contained)
+# ==========================================================
+Vec2 = Tuple[int, int]
+ColorType = Union[str, Tuple[int, int, int]]
+
+
+def to_array(v: Vec2) -> np.ndarray:
+    return np.array(v, dtype=float)
+
+
+def hex_to_rbg(color: ColorType) -> Tuple[int, int, int]:
+    if isinstance(color, tuple):
+        return color
+    color = color.lstrip("#")
+    return tuple(int(color[i:i+2], 16) for i in (0, 2, 4))
 
 
 # ==========================================================
-# STYLE
+# STYLE SCROLL VIEW
 # ==========================================================
 @dataclass(slots=True)
-class StyleGrid:
-    rows: int = 3
-    cols: int = 3
-
+class StyleScrollView:
     pos: Vec2 = (0, 0)
-    size: Vec2 = (500, 500)
+    size: Vec2 = (300, 300)
 
-    gap_row: int = 4
-    gap_col: int = 4
+    content_size: Vec2 = (300, 800)
 
-    padding: tuple[int, int, int, int] = (0, 0, 0, 0)  # top right bottom left
+    direction: Literal["vertical", "horizontal"] = "vertical"
 
-    border: int = 0
-    border_color: ColorType = "#000000"
-    border_radius: int = 0
-
-    cell_border: int = 0
-    cell_border_color: ColorType = "#cccccc"
-    cell_border_radius: int = 0
-    cell_bg_color: ColorType = "#ffffff"
-
-    bg_color: ColorType = "#f0f0f0"
+    scroll_speed: int = 30
     visible: bool = True
 
+    bg_color: ColorType = "#f0f0f0"
+
+    # scrollbar
+    show_scrollbar: bool = True
+    scrollbar_width: int = 10
+
+    scrollbar_color: ColorType = "#999999"
+    scrollbar_color_hover: ColorType = "#777777"
+    scrollbar_color_active: ColorType = "#555555"
+
 
 # ==========================================================
-# CELL
+# SCROLL VIEW
 # ==========================================================
-class GridCell:
+class ScrollView:
     def __init__(
         self,
         surface: pygame.Surface,
-        rect: pygame.Rect,
-        style: StyleGrid,
-        render_func: Optional[Callable[[pygame.Surface], None]] = None
+        style: StyleScrollView,
+        render_func: Optional[Callable[[pygame.Surface, np.ndarray], None]] = None
     ):
         self.__surface = surface
-        self.__rect = rect
         self.__style = style
         self.__render_func = render_func
 
-    # ---------------- PRIVATE ----------------
-    def __draw_bg(self):
-        pygame.draw.rect(
-            self.__surface,
-            hex_to_rbg(self.__style.cell_bg_color),
-            self.__rect,
-            border_radius=self.__style.cell_border_radius
-        )
+        self.__offset = np.array([0.0, 0.0])
 
-    def __draw_border(self):
-        if self.__style.cell_border <= 0:
-            return
+        self.__viewport_rect = pygame.Rect(0, 0, 0, 0)
+        self.__scrollbar_rect = pygame.Rect(0, 0, 0, 0)
 
-        pygame.draw.rect(
-            self.__surface,
-            hex_to_rbg(self.__style.cell_border_color),
-            self.__rect,
-            width=self.__style.cell_border,
-            border_radius=self.__style.cell_border_radius
-        )
+        self.__dragging = False
+        self.__hovered = False
 
-    def __draw_content(self):
-        if not self.__render_func:
-            return
-
-        sub = self.__surface.subsurface(self.__rect)
-        self.__render_func(sub)
-
-    # ---------------- PUBLIC ----------------
-    def update(self):
-        self.__draw_bg()
-        self.__draw_border()
-        self.__draw_content()
-
-    def get_surface(self) -> pygame.Surface:
-        return self.__surface.subsurface(self.__rect)
-
-    def set_render(self, func: Callable[[pygame.Surface], None]):
-        self.__render_func = func
-
-
-# ==========================================================
-# GRID
-# ==========================================================
-class Grid:
-    def __init__(self, surface: pygame.Surface, style: StyleGrid):
-        self.__surface = surface
-        self.__style = style
-
-        self.__cells: List[List[GridCell]] = []
-        self.__cell_size = np.array((0, 0))
-
-        self.__create_cells()
-
-    # ---------------- PRIVATE ----------------
-    def __calc_cell_size(self) -> np.ndarray:
+    # ================= PRIVATE =================
+    def __build_rect(self):
+        pos = to_array(self.__style.pos)
         size = to_array(self.__style.size)
-        padding = np.array(self.__style.padding)  # top right bottom left
 
-        inner_w = size[0] - padding[1] - padding[3]
-        inner_h = size[1] - padding[0] - padding[2]
-
-        total_gap_w = (self.__style.cols - 1) * self.__style.gap_col
-        total_gap_h = (self.__style.rows - 1) * self.__style.gap_row
-
-        cell_w = (inner_w - total_gap_w) / self.__style.cols
-        cell_h = (inner_h - total_gap_h) / self.__style.rows
-
-        return np.array((cell_w, cell_h))
-
-    def __calc_cell_pos(self, row: int, col: int) -> np.ndarray:
-        base = to_array(self.__style.pos)
-        padding = np.array(self.__style.padding)
-
-        cell_size = self.__cell_size
-
-        x = (
-            base[0]
-            + padding[3]
-            + col * (cell_size[0] + self.__style.gap_col)
+        self.__viewport_rect = pygame.Rect(
+            int(pos[0]), int(pos[1]),
+            int(size[0]), int(size[1])
         )
 
-        y = (
-            base[1]
-            + padding[0]
-            + row * (cell_size[1] + self.__style.gap_row)
-        )
+    def __handle_wheel(self):
+        mouse = pygame.mouse.get_pos()
+        if not self.__viewport_rect.collidepoint(mouse):
+            return
 
-        return np.array((x, y))
+        for e in pygame.event.get(pygame.MOUSEWHEEL):
+            if self.__style.direction == "vertical":
+                self.__offset[1] -= e.y * self.__style.scroll_speed
+            else:
+                self.__offset[0] -= e.y * self.__style.scroll_speed
 
-    def __create_cells(self):
-        self.__cells.clear()
-        self.__cell_size = self.__calc_cell_size()
+    def __clamp_offset(self):
+        view = to_array(self.__style.size)
+        content = to_array(self.__style.content_size)
 
-        for r in range(self.__style.rows):
-            row_cells = []
-            for c in range(self.__style.cols):
-                pos = self.__calc_cell_pos(r, c)
+        max_offset = np.maximum(content - view, 0)
+        self.__offset = np.clip(self.__offset, 0, max_offset)
 
-                rect = pygame.Rect(
-                    int(pos[0]),
-                    int(pos[1]),
-                    int(self.__cell_size[0]),
-                    int(self.__cell_size[1])
-                )
+    def __build_scrollbar(self):
+        if not self.__style.show_scrollbar:
+            return
 
-                row_cells.append(
-                    GridCell(self.__surface, rect, self.__style)
-                )
+        view = to_array(self.__style.size)
+        content = to_array(self.__style.content_size)
 
-            self.__cells.append(row_cells)
+        ratio = view / content
+
+        if self.__style.direction == "vertical":
+            height = view[1] * ratio[1]
+            y = self.__viewport_rect.top + (self.__offset[1] / content[1]) * view[1]
+
+            self.__scrollbar_rect = pygame.Rect(
+                self.__viewport_rect.right - self.__style.scrollbar_width,
+                int(y),
+                self.__style.scrollbar_width,
+                int(height)
+            )
+        else:
+            width = view[0] * ratio[0]
+            x = self.__viewport_rect.left + (self.__offset[0] / content[0]) * view[0]
+
+            self.__scrollbar_rect = pygame.Rect(
+                int(x),
+                self.__viewport_rect.bottom - self.__style.scrollbar_width,
+                int(width),
+                self.__style.scrollbar_width
+            )
+
+    def __handle_drag(self):
+        mouse = pygame.mouse.get_pos()
+        pressed = pygame.mouse.get_pressed()[0]
+
+        self.__hovered = self.__scrollbar_rect.collidepoint(mouse)
+
+        if pressed and self.__hovered:
+            self.__dragging = True
+
+        if not pressed:
+            self.__dragging = False
+
+        if self.__dragging:
+            view = to_array(self.__style.size)
+            content = to_array(self.__style.content_size)
+
+            if self.__style.direction == "vertical":
+                rel = mouse[1] - self.__viewport_rect.top
+                self.__offset[1] = (rel / view[1]) * content[1]
+            else:
+                rel = mouse[0] - self.__viewport_rect.left
+                self.__offset[0] = (rel / view[0]) * content[0]
 
     def __draw_bg(self):
-        rect = pygame.Rect(
-            int(self.__style.pos[0]),
-            int(self.__style.pos[1]),
-            int(self.__style.size[0]),
-            int(self.__style.size[1])
-        )
-
         pygame.draw.rect(
             self.__surface,
             hex_to_rbg(self.__style.bg_color),
-            rect,
-            border_radius=self.__style.border_radius
+            self.__viewport_rect
         )
 
-    def __draw_border(self):
-        if self.__style.border <= 0:
+    def __draw_content(self):
+        old_clip = self.__surface.get_clip()
+        self.__surface.set_clip(self.__viewport_rect)
+
+        if self.__render_func:
+            self.__render_func(self.__surface, self.__offset)
+
+        self.__surface.set_clip(old_clip)
+
+    def __draw_scrollbar(self):
+        if not self.__style.show_scrollbar:
             return
 
-        rect = pygame.Rect(
-            int(self.__style.pos[0]),
-            int(self.__style.pos[1]),
-            int(self.__style.size[0]),
-            int(self.__style.size[1])
-        )
+        color = self.__style.scrollbar_color
+
+        if self.__dragging:
+            color = self.__style.scrollbar_color_active
+        elif self.__hovered:
+            color = self.__style.scrollbar_color_hover
 
         pygame.draw.rect(
             self.__surface,
-            hex_to_rbg(self.__style.border_color),
-            rect,
-            width=self.__style.border,
-            border_radius=self.__style.border_radius
+            hex_to_rbg(color),
+            self.__scrollbar_rect,
+            border_radius=5
         )
 
-    def __draw_cells(self):
-        for row in self.__cells:
-            for cell in row:
-                cell.update()
-
-    # ---------------- PUBLIC ----------------
+    # ================= PUBLIC =================
     def update(self):
         if not self.__style.visible:
             return
 
+        self.__build_rect()
+        self.__handle_wheel()
+        self.__handle_drag()
+        self.__clamp_offset()
+        self.__build_scrollbar()
+
         self.__draw_bg()
-        self.__draw_border()
-        self.__draw_cells()
+        self.__draw_content()
+        self.__draw_scrollbar()
 
-    def get_cell(self, row: int, col: int) -> GridCell:
-        return self.__cells[row][col]
 
-    def set_cell_content(self, row: int, col: int, func: Callable[[pygame.Surface], None]):
-        self.__cells[row][col].set_render(func)
+# ==========================================================
+# TEXT FRAME (FOR TEST)
+# ==========================================================
+class TextFrame:
+    def __init__(self, font: pygame.font.Font, color=(0, 0, 0)):
+        self.__font = font
+        self.__color = color
+        self.__lines: List[str] = []
 
-    def get_cell_surface(self, row: int, col: int) -> pygame.Surface:
-        return self.__cells[row][col].get_surface()
-    
+    def __wrap(self, text: str, max_width: int) -> List[str]:
+        words = text.split(" ")
+        lines = []
+        current = ""
+
+        for w in words:
+            test = current + (" " if current else "") + w
+            if self.__font.render(test, True, self.__color).get_width() <= max_width:
+                current = test
+            else:
+                lines.append(current)
+                current = w
+
+        if current:
+            lines.append(current)
+
+        return lines
+
+    def set_text(self, text: str, max_width: int):
+        self.__lines = self.__wrap(text, max_width)
+
+    def draw(self, surface: pygame.Surface, offset: np.ndarray):
+        y = -offset[1]
+
+        for line in self.__lines:
+            surf = self.__font.render(line, True, self.__color)
+            surface.blit(surf, (10, y))
+            y += surf.get_height() + 5
+
+
+# ==========================================================
+# MAIN DEMO
+# ==========================================================
 def main():
     pygame.init()
-
     screen = pygame.display.set_mode((800, 600))
     clock = pygame.time.Clock()
 
-    style = StyleGrid(
-        rows=3,
-        cols=3,
-        pos=(150, 50),
-        size=(500, 500),
-        padding=(10, 10, 10, 10),
-        gap_row=5,
-        gap_col=5,
-        cell_border=1
+    font = pygame.font.Font(None, 24)
+
+    # text dài
+    text = ("This is a ScrollView test with wrapped text. " * 40)
+
+    text_frame = TextFrame(font)
+    text_frame.set_text(text, 260)
+
+    def render(surface, offset):
+        text_frame.draw(surface, offset)
+
+    style = StyleScrollView(
+        pos=(250, 100),
+        size=(300, 350),
+        content_size=(300, 1500)
     )
 
-    grid = Grid(screen, style)
-
-    # demo content
-    def make_cell_text(text):
-        def render(surface):
-            font = pygame.font.Font(None, 30)
-            txt = font.render(text, True, (0, 0, 0))
-            rect = txt.get_rect(center=surface.get_rect().center)
-            surface.blit(txt, rect)
-        return render
-
-    for r in range(3):
-        for c in range(3):
-            grid.set_cell_content(r, c, make_cell_text(f"{r},{c}"))
+    scroll = ScrollView(screen, style, render)
 
     running = True
     while running:
@@ -262,7 +275,7 @@ def main():
             if e.type == pygame.QUIT:
                 running = False
 
-        grid.update()
+        scroll.update()
 
         pygame.display.flip()
         clock.tick(60)
