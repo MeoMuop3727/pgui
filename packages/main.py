@@ -1,274 +1,255 @@
 import pygame
 import numpy as np
 
-from dataclasses import dataclass
-from typing import Optional, Callable, Literal
-from enum import Enum
-
+from dataclasses import dataclass, field
+from typing import Literal
 from packages.utils.utils_typing import Vec2, ColorType
 from packages.utils.utils_transform import to_array, hex_to_rbg
-
-
-# ==========================================================
-# STATE
-# ==========================================================
-class StateSlider(Enum):
-    NORMAL = 1
-    HOVER = 2
-    PRESSED = 3
 
 
 # ==========================================================
 # STYLE
 # ==========================================================
 @dataclass(slots=True)
-class StyleSlider:
-    min_value: float = 0
-    max_value: float = 100
-    value: float = 0
-    step: float = 1
+class StyleTooltip:
+    content: str = ""
+    placement: Literal["top", "bottom", "left", "right"] = "top"
+    offset: Vec2 = (0, 0)
 
-    orientation: Literal["horizontal", "vertical"] = "horizontal"
-
-    size: Vec2 = (200, 20)
-    pos: Vec2 = (0, 0)
+    delay: float = 0.5
+    size: Vec2 = (150, 35)
 
     visible: bool = True
 
-    on_change: Optional[Callable[[float], None]] = None
-    on_sound: Optional[pygame.mixer.Sound] = None
+    # bg
+    bg_color: ColorType = "#222222"
+    border: int = 0
+    border_color: ColorType = "#000000"
+    border_radius: int = 6
 
-    # track
-    track_color: ColorType = "#cccccc"
-    track_color_hover: ColorType = "#bbbbbb"
-    track_color_active: ColorType = "#4caf50"
+    # text
+    color: ColorType = "#ffffff"
+    font: pygame.font.Font = field(
+        default_factory=lambda: pygame.font.Font(None, 20)
+    )
+    antialias: bool = True
+    padding: int = 8
 
-    track_height: int = 6
-    track_border_radius: int = 50
-
-    # thumb
-    thumb_color: ColorType = "#ffffff"
-    thumb_color_hover: ColorType = "#f0f0f0"
-    thumb_color_pressed: ColorType = "#e0e0e0"
-
-    thumb_border_color: ColorType = "#aaaaaa"
-    thumb_border_color_hover: ColorType = "#888888"
-    thumb_border_color_pressed: ColorType = "#555555"
-
-    thumb_size: int = 18
-    thumb_border: int = 1
-    thumb_border_radius: int = 50
+    # arrow
+    show_arrow: bool = True
+    arrow_size: Vec2 = (8, 6)
+    arrow_color: ColorType = "#222222"
 
 
 # ==========================================================
-# SLIDER
+# TOOLTIP
 # ==========================================================
-class Slider:
-    def __init__(self, surface: pygame.Surface, style: StyleSlider):
+class Tooltip:
+    def __init__(
+        self,
+        surface: pygame.Surface,
+        style: StyleTooltip,
+        anchor_rect: pygame.Rect
+    ):
         self.__surface = surface
         self.__style = style
+        self.__anchor_rect = anchor_rect
 
-        self.__value: float = style.value
+        self.__rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
 
-        self.__is_hovered: bool = False
-        self.__is_pressed: bool = False
+        self.__is_visible: bool = False
+        self.__hover_timer: int = 0
 
-        self.__track_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
-        self.__thumb_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
-        self.__fill_rect: pygame.Rect = pygame.Rect(0, 0, 0, 0)
+        self.__content: str = style.content
 
     # ======================================================
     # PRIVATE
     # ======================================================
-    def __get_visual_state(self) -> StateSlider:
-        if self.__is_pressed:
-            return StateSlider.PRESSED
-        if self.__is_hovered:
-            return StateSlider.HOVER
-        return StateSlider.NORMAL
+    def __handle_hover(self):
+        mouse = pygame.mouse.get_pos()
+        now = pygame.time.get_ticks()
 
-    def __get_thumb_color_state(self):
-        state = self.__get_visual_state()
+        if self.__anchor_rect.collidepoint(mouse):
+            if self.__hover_timer == 0:
+                self.__hover_timer = now
 
-        if state == StateSlider.PRESSED:
-            return hex_to_rbg(self.__style.thumb_color_pressed)
-        if state == StateSlider.HOVER:
-            return hex_to_rbg(self.__style.thumb_color_hover)
+            elapsed = (now - self.__hover_timer) / 1000.0
+            self.__is_visible = elapsed >= self.__style.delay
+        else:
+            self.__hover_timer = 0
+            self.__is_visible = False
 
-        return hex_to_rbg(self.__style.thumb_color)
+    def __calc_pos(self) -> np.ndarray:
+        anchor = self.__anchor_rect
+        size = to_array(self.__style.size)
+        offset = to_array(self.__style.offset)
 
-    def __get_thumb_border_color_state(self):
-        state = self.__get_visual_state()
+        if self.__style.placement == "top":
+            base = np.array((anchor.centerx - size[0] / 2,
+                             anchor.top - size[1]))
 
-        if state == StateSlider.PRESSED:
-            return hex_to_rbg(self.__style.thumb_border_color_pressed)
-        if state == StateSlider.HOVER:
-            return hex_to_rbg(self.__style.thumb_border_color_hover)
+        elif self.__style.placement == "bottom":
+            base = np.array((anchor.centerx - size[0] / 2,
+                             anchor.bottom))
 
-        return hex_to_rbg(self.__style.thumb_border_color)
+        elif self.__style.placement == "left":
+            base = np.array((anchor.left - size[0],
+                             anchor.centery - size[1] / 2))
 
-    def __get_track_color_state(self):
-        if self.__is_hovered:
-            return hex_to_rbg(self.__style.track_color_hover)
-        return hex_to_rbg(self.__style.track_color)
+        else:  # right
+            base = np.array((anchor.right,
+                             anchor.centery - size[1] / 2))
 
-    def __build_track_rect(self) -> pygame.Rect:
-        pos = to_array(self.__style.pos)
+        pos = base + offset
+
+        # clamp vào màn hình
+        screen_w, screen_h = self.__surface.get_size()
+
+        pos[0] = max(0, min(screen_w - size[0], pos[0]))
+        pos[1] = max(0, min(screen_h - size[1], pos[1]))
+
+        return pos
+
+    def __build_rect(self) -> pygame.Rect:
+        pos = self.__calc_pos()
         size = to_array(self.__style.size)
 
-        if self.__style.orientation == "horizontal":
-            track_size = np.array((size[0], self.__style.track_height))
-            offset = np.array((0, (size[1] - track_size[1]) // 2))
-        else:
-            track_size = np.array((self.__style.track_height, size[1]))
-            offset = np.array(((size[0] - track_size[0]) // 2, 0))
-
-        final_pos = pos + offset
-
         return pygame.Rect(
-            int(final_pos[0]), int(final_pos[1]),
-            int(track_size[0]), int(track_size[1])
+            int(pos[0]), int(pos[1]),
+            int(size[0]), int(size[1])
         )
 
-    def __calc_thumb_pos(self) -> np.ndarray:
-        ratio = (self.__value - self.__style.min_value) / (
-            self.__style.max_value - self.__style.min_value
-        )
-
-        track = self.__track_rect
-
-        if self.__style.orientation == "horizontal":
-            x = track.left + ratio * track.width
-            y = track.centery
-            return np.array((x, y))
-
-        else:
-            y = track.bottom - ratio * track.height
-            x = track.centerx
-            return np.array((x, y))
-
-    def __build_thumb_rect(self) -> pygame.Rect:
-        center = self.__calc_thumb_pos()
-        size = self.__style.thumb_size
-
-        pos = center - np.array((size / 2, size / 2))
-
-        return pygame.Rect(int(pos[0]), int(pos[1]), size, size)
-
-    def __build_fill_rect(self) -> pygame.Rect:
-        track = self.__track_rect
-
-        if self.__style.orientation == "horizontal":
-            width = self.__thumb_rect.centerx - track.left
-            return pygame.Rect(track.left, track.top, width, track.height)
-        else:
-            height = track.bottom - self.__thumb_rect.centery
-            return pygame.Rect(track.left, self.__thumb_rect.centery, track.width, height)
-
-    def __calc_value_from_pos(self, mouse_pos: Vec2) -> float:
-        track = self.__track_rect
-
-        if self.__style.orientation == "horizontal":
-            ratio = (mouse_pos[0] - track.left) / track.width
-        else:
-            ratio = (track.bottom - mouse_pos[1]) / track.height
-
-        ratio = max(0, min(1, ratio))
-
-        value = self.__style.min_value + ratio * (
-            self.__style.max_value - self.__style.min_value
-        )
-
-        # step
-        step = self.__style.step
-        value = round(value / step) * step
-
-        return value
-
-    def __handle_drag(self, events):
-        mouse = pygame.mouse.get_pos()
-
-        self.__is_hovered = self.__thumb_rect.collidepoint(mouse)
-
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.__thumb_rect.collidepoint(mouse):
-                    self.__is_pressed = True
-
-            elif event.type == pygame.MOUSEBUTTONUP:
-                self.__is_pressed = False
-
-        if self.__is_pressed:
-            new_value = self.__calc_value_from_pos(mouse)
-
-            if new_value != self.__value:
-                self.__value = new_value
-
-                if self.__style.on_change:
-                    self.__style.on_change(self.__value)
-
-                if self.__style.on_sound:
-                    self.__style.on_sound.play()
-
-    def __draw_track(self):
+    def __draw_bg(self):
         pygame.draw.rect(
             self.__surface,
-            self.__get_track_color_state(),
-            self.__track_rect,
-            border_radius=self.__style.track_border_radius
+            hex_to_rbg(self.__style.bg_color),
+            self.__rect,
+            border_radius=self.__style.border_radius
         )
 
-    def __draw_fill(self):
+    def __draw_border(self):
+        if self.__style.border <= 0:
+            return
+
         pygame.draw.rect(
             self.__surface,
-            hex_to_rbg(self.__style.track_color_active),
-            self.__fill_rect,
-            border_radius=self.__style.track_border_radius
+            hex_to_rbg(self.__style.border_color),
+            self.__rect,
+            width=self.__style.border,
+            border_radius=self.__style.border_radius
         )
 
-    def __draw_thumb(self):
-        pygame.draw.rect(
-            self.__surface,
-            self.__get_thumb_color_state(),
-            self.__thumb_rect,
-            border_radius=self.__style.thumb_border_radius
-        )
+    def __wrap_text(self, text: str) -> list[str]:
+        words = text.split(" ")
+        lines = []
 
-    def __draw_thumb_border(self):
-        pygame.draw.rect(
-            self.__surface,
-            self.__get_thumb_border_color_state(),
-            self.__thumb_rect,
-            width=self.__style.thumb_border,
-            border_radius=self.__style.thumb_border_radius
-        )
+        max_width = self.__rect.width - self.__style.padding * 2
+
+        current = ""
+
+        for word in words:
+            test = current + (" " if current else "") + word
+            surf = self.__style.font.render(test, True, (0, 0, 0))
+
+            if surf.get_width() <= max_width:
+                current = test
+            else:
+                lines.append(current)
+                current = word
+
+        if current:
+            lines.append(current)
+
+        return lines
+
+    def __draw_content(self):
+        lines = self.__wrap_text(self.__content)
+
+        y = self.__rect.top + self.__style.padding
+
+        for line in lines:
+            surf = self.__style.font.render(
+                line,
+                self.__style.antialias,
+                hex_to_rbg(self.__style.color)
+            )
+
+            x = self.__rect.left + self.__style.padding
+
+            self.__surface.blit(surf, (x, y))
+
+            y += surf.get_height()
+
+    def __draw_arrow(self):
+        if not self.__style.show_arrow:
+            return
+
+        base, height = self.__style.arrow_size
+        rect = self.__rect
+        anchor = self.__anchor_rect
+
+        color = hex_to_rbg(self.__style.arrow_color)
+
+        if self.__style.placement == "top":
+            tip = (anchor.centerx, anchor.top)
+            points = [
+                (tip[0] - base, rect.bottom),
+                (tip[0] + base, rect.bottom),
+                (tip[0], rect.bottom + height)
+            ]
+
+        elif self.__style.placement == "bottom":
+            tip = (anchor.centerx, anchor.bottom)
+            points = [
+                (tip[0] - base, rect.top),
+                (tip[0] + base, rect.top),
+                (tip[0], rect.top - height)
+            ]
+
+        elif self.__style.placement == "left":
+            tip = (anchor.left, anchor.centery)
+            points = [
+                (rect.right, tip[1] - base),
+                (rect.right, tip[1] + base),
+                (rect.right + height, tip[1])
+            ]
+
+        else:  # right
+            tip = (anchor.right, anchor.centery)
+            points = [
+                (rect.left, tip[1] - base),
+                (rect.left, tip[1] + base),
+                (rect.left - height, tip[1])
+            ]
+
+        pygame.draw.polygon(self.__surface, color, points)
 
     # ======================================================
     # PUBLIC
     # ======================================================
-    def update(self, events):
+    def update(self):
         if not self.__style.visible:
             return
 
-        self.__track_rect = self.__build_track_rect()
-        self.__thumb_rect = self.__build_thumb_rect()
-        self.__fill_rect = self.__build_fill_rect()
+        self.__handle_hover()
 
-        self.__handle_drag(events)
+        if not self.__is_visible:
+            return
 
-        self.__draw_track()
-        self.__draw_fill()
-        self.__draw_thumb()
-        self.__draw_thumb_border()
+        self.__rect = self.__build_rect()
 
-    def get_value(self) -> float:
-        return self.__value
+        self.__draw_bg()
+        self.__draw_border()
+        self.__draw_content()
+        self.__draw_arrow()
 
-    def set_value(self, value: float):
-        self.__value = max(
-            self.__style.min_value,
-            min(self.__style.max_value, value)
-        )
+    @property
+    def content(self) -> str:
+        return self.__content
+
+    @content.setter
+    def content(self, value: str):
+        self.__content = value
 
 
 # ==========================================================
@@ -280,30 +261,27 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode((800, 600))
     clock = pygame.time.Clock()
 
-    def on_change(val):
-        print("Value:", val)
+    anchor = pygame.Rect(350, 250, 100, 60)
 
-    style = StyleSlider(
-        pos=(300, 250),
-        size=(300, 40),
-        min_value=0,
-        max_value=100,
-        value=50,
-        on_change=on_change
+    style = StyleTooltip(
+        content="This is a tooltip with wrapping text example",
+        placement="top",
+        size=(180, 60)
     )
 
-    slider = Slider(screen, style)
+    tooltip = Tooltip(screen, style, anchor)
 
     running = True
     while running:
-        screen.fill((30, 30, 30))
+        screen.fill("#ffffff")
 
-        events = pygame.event.get()
-        for e in events:
+        for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 running = False
 
-        slider.update(events)
+        pygame.draw.rect(screen, (70, 70, 70), anchor)
+
+        tooltip.update()
 
         pygame.display.flip()
         clock.tick(60)

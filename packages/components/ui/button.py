@@ -108,6 +108,8 @@ class StyleButton:
         Callback function triggered when the button is clicked.
     on_sound : pygame.mixer.Sound, optional
         Sound played when the button is clicked.
+    on_hover : (...)
+        Callback function triggered when the button is hovered.
     state : StateButton
         Initial state of the button. Defaults to NORMAL.
     visible : bool
@@ -157,6 +159,7 @@ class StyleButton:
     # general
     on_click: Optional[Callable[[], None]] = None
     on_sound: Optional[pygame.mixer.Sound] = None
+    on_hover: Optional[Callable[[any], None]] = None
     state: StateButton = StateButton.NORMAL
     visible: bool = True
     transition: int = 0
@@ -315,6 +318,9 @@ class ButtonText(Button):
             if self.state == StateButton.DISABLE:
                 self.is_hover = False
                 self.is_pressed = False
+            
+            if self.is_hover:
+                if self.style.on_hover is not None: self.style.on_hover()
             
             if self.is_hover and pygame.mouse.get_pressed()[0]:
                 if not self.is_pressed: self.is_pressed = True

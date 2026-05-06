@@ -23,5 +23,5 @@ __all__ = [
     "StyleDropdown", "Dropdown",
     "StyleSlider", "Slider",
     "StyleLabel", "Label",
-    "StyleImage", "Image"
+    "StyleImage", "Image",
 ]
