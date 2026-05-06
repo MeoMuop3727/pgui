@@ -10,6 +10,7 @@ from .dropdown import StyleDropdown, Dropdown
 from .slider import StyleSlider, Slider
 from .label import StyleLabel, Label
 from .image import StyleImage, Image
+from .panel import StylePanel, Panel
 
 __all__ = [
     "Button", "ButtonText", "ButtonImage", "StyleButton",
@@ -24,4 +25,5 @@ __all__ = [
     "StyleSlider", "Slider",
     "StyleLabel", "Label",
     "StyleImage", "Image",
+    "StylePanel", "Panel"
 ]
