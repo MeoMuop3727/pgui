@@ -11,7 +11,7 @@ It includes:
 - `Input`       : Renders an interactive text input field with cursor and focus management.
 
 Typical usage:
-    style = StyleInput(
+>>> style = StyleInput(
         placeholder="Enter your name...",
         size=(350, 65),
         pos=(100, 100),
@@ -19,14 +19,11 @@ Typical usage:
         border_color="#aaaaaa"
     )
     input_field = Input(surface, style)
-
     # Inside game loop
     input_field.update()
-
     # Inside event loop
     for event in pygame.event.get():
         input_field.input(event)
-
     # Read current value
     text = input_field.content
 """
@@ -155,29 +152,36 @@ class Input:
 
     Attributes
     ----------
-    surface : pygame.Surface
+>>> surface : pygame.Surface
+    
         The surface on which the input field is drawn.
-    style : StyleInput
+    
+>>> style : StyleInput
+    
         The style/configuration object for this input field.
 
     Properties
     ----------
-    content : str
+>>> content : str
+    
         Returns the current text value of the input field.
 
     Methods
     -------
-    update() -> None
+>>> update() -> None
+    
         Handles mouse focus, cursor blinking, and renders the input field each frame.
         Does nothing if ``StyleInput.visible`` is False.
-    input(event: pygame.event.Event) -> None
+
+>>> input(event: pygame.event.Event) -> None
+        
         Processes a pygame keyboard event.
         Must be called inside the event loop to handle typing and cursor movement.
         Supports: typing, backspace, space, left/right arrow keys.
 
     Example
     -------
-        style = StyleInput(
+>>> style = StyleInput(
             placeholder="Search...",
             size=(300, 50),
             border=1,
@@ -185,10 +189,8 @@ class Input:
             background_color_focused="#ffffff"
         )
         field = Input(surface, style)
-
         # Inside game loop
         field.update()
-
         # Inside event loop
         for event in pygame.event.get():
             field.input(event)

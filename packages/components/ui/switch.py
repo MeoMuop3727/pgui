@@ -13,17 +13,15 @@ It includes:
 - `Switch`       : Renders a toggle switch and manages its ON/OFF state.
 
 Typical usage:
-    style = StyleSwitch(
+>>> style = StyleSwitch(
         track_color="#cccccc",
         track_color_active="#4caf50",
         size=(70, 36),
         on_click=lambda is_on: print(f"Switch is {'ON' if is_on else 'OFF'}")
     )
     switch = Switch(surface, style)
-
     # Inside game loop
     switch.update()
-
     # Read current state
     is_on = switch.get_state()
 """
@@ -185,29 +183,34 @@ class Switch:
 
     Attributes
     ----------
-    surface : pygame.Surface
+>>> surface : pygame.Surface
+
         The surface on which the switch is drawn.
-    style : StyleSwitch
+
+>>> style : StyleSwitch
+
         The style/configuration object for this switch.
 
     Methods
     -------
-    update() -> None
+>>> update() -> None
+
         Handles mouse interaction, updates toggle state,
         and draws the switch each frame.
         Does nothing if `StyleSwitch.visible` is False.
-    get_state() -> bool or Literal[0, 1]
+
+>>> get_state() -> bool or Literal[0, 1]
+
         Returns the current ON/OFF state of the switch.
 
     Example
     -------
-        style = StyleSwitch(
+>>> style = StyleSwitch(
             track_color_active="#4caf50",
             size=(70, 36),
             on_click=lambda is_on: print(is_on)
         )
         switch = Switch(surface, style)
-
         # Inside game loop
         switch.update()
     """

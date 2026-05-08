@@ -12,16 +12,14 @@ It includes:
 - `RadioButtonList`   : Manages a vertical list of radio buttons with exclusive selection logic.
 
 Typical usage:
-    style = StyleRadioButton(
+>>> style = StyleRadioButton(
         label_list=["Option A", "Option B", "Option C"],
         checked_list=[True, False, False],
         on_change=lambda states: print(states)
     )
     radio_list = RadioButtonList(surface, style)
-
     # Inside game loop
     radio_list.update()
-
     # Read current states
     states = radio_list.get_state_radio_button()
 """
@@ -207,26 +205,37 @@ class RadioButton:
 
     Attributes
     ----------
-    surface : pygame.Surface
+>>> surface : pygame.Surface
+
         The surface on which the radio button is drawn.
-    style : StyleRadioButton
+
+>>> style : StyleRadioButton
+
         The shared style/configuration object.
-    pos : Vec2
+
+>>> pos : Vec2
+
         Position (x, y) of this specific radio button on the surface.
-    label : str
+
+>>> label : str
+
         Text label displayed beside the radio button.
-    checked : bool
+
+>>> checked : bool
+
         Initial checked state of this radio button.
 
     Properties
     ----------
-    checked : bool
+>>> checked : bool
+
         Gets or sets the current checked state of the radio button.
         Used by ``RadioButtonList`` to enforce exclusive selection.
 
     Methods
     -------
-    update() -> None
+>>> update() -> None
+
         Handles mouse interaction, updates checked state on click,
         and renders the radio button each frame.
         Does nothing if ``StyleRadioButton.visible`` is False.
@@ -349,40 +358,42 @@ class RadioButtonList:
 
     Attributes
     ----------
-    surface : pygame.Surface
+>>> surface : pygame.Surface
+    
         The surface on which all radio buttons are drawn.
-    style : StyleRadioButton
+    
+>>> style : StyleRadioButton
+    
         The style/configuration object defining labels, colors, and layout.
 
     Methods
     -------
-    update() -> None
+>>> update() -> None
+
         Enforces exclusive selection, then updates and renders all
         radio buttons each frame.
         Does nothing if ``StyleRadioButton.visible`` is False.
-    get_state_radio_button() -> List[bool]
+
+>>> get_state_radio_button() -> List[bool]
+
         Returns a list of checked states for all radio buttons,
         in the same order as ``StyleRadioButton.label_list``.
         Only one value will be True at any given time.
 
     Example
     -------
-        style = StyleRadioButton(
+>>> style = StyleRadioButton(
             label_list=["Small", "Medium", "Large"],
             checked_list=[False, True, False],
             pos=(50, 100),
             on_change=lambda states: print(states)
-        )
-        
+        ) 
         radio_list = RadioButtonList(surface, style)
-
         # Inside game loop
         radio_list.update()
-
         # Read active selection
         states = radio_list.get_state_radio_button()
-        
-        → [False, True, False]
+        # -> [False, True, False]
     """
 
     def __init__(self,

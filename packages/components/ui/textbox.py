@@ -10,14 +10,13 @@ It includes:
 - `TextBox`      : Renders wrapped text inside a styled rectangular frame.
 
 Typical usage:
-    style = StyleTextBox(
+>>> style = StyleTextBox(
         content="Hello, this is a text box.",
         size=(500, 400),
         padding=10,
         bg_color="#f0f0f0"
     )
     textbox = TextBox(surface, style)
-
     # Inside game loop
     textbox.update()
 """
@@ -99,20 +98,24 @@ class TextBox:
 
     Attributes
     ----------
-    surface : pygame.Surface
+>>> surface : pygame.Surface
+
         The surface on which the text box is drawn.
-    style : StyleTextBox
+
+>>> style : StyleTextBox
+
         The style/configuration object for this text box.
 
     Methods
     -------
-    update() -> None
+>>> update() -> None
+
         Draws the border, background, and wrapped text each frame.
         Does nothing if `StyleTextBox.visible` is False.
 
     Example
     -------
-        style = StyleTextBox(
+>>> style = StyleTextBox(
             content="This is a long text that will be wrapped automatically.",
             size=(400, 300),
             padding=12,
@@ -121,7 +124,6 @@ class TextBox:
             border_color="#aaaaaa"
         )
         textbox = TextBox(surface, style)
-
         # Inside game loop
         textbox.update()
     """

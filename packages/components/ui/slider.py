@@ -11,7 +11,7 @@ It includes:
 - `Slider`       : Renders an interactive slider with a track, fill, and draggable thumb.
 
 Typical usage:
-    style = StyleSlider(
+>>> style = StyleSlider(
         min_value=0,
         max_value=100,
         value=50,
@@ -21,13 +21,10 @@ Typical usage:
         pos=(100, 200)
     )
     slider = Slider(surface, style)
-
     # Inside game loop
     slider.update()
-
     # Inside event loop
     slider.input(events)
-
     # Read current value
     current = slider.value
 """
@@ -184,32 +181,39 @@ class Slider:
 
     Attributes
     ----------
-    surface : pygame.Surface
+>>> surface : pygame.Surface
+
         The surface on which the slider is drawn.
-    style : StyleSlider
+
+>>> style : StyleSlider
+
         The style/configuration object for this slider.
 
     Properties
     ----------
-    value : Number
+>>> value : Number
+
         Gets or sets the current value of the slider.
         Setting the value externally does not rebuild rects automatically —
         call ``update()`` to reflect changes visually.
 
     Methods
     -------
-    update() -> None
+>>> update() -> None
+
         Determines the visual state and renders the track, fill,
         and thumb each frame.
         Does nothing if ``StyleSlider.visible`` is False.
-    input(events: List[pygame.event.Event]) -> None
+
+>>> input(events: List[pygame.event.Event]) -> None
+
         Processes mouse events to handle thumb dragging.
         Updates value, thumb position, and fill rect when dragging.
         Must be called inside the event loop each frame.
 
     Example
     -------
-        style = StyleSlider(
+>>> style = StyleSlider(
             min_value=0,
             max_value=100,
             value=30,
@@ -217,14 +221,12 @@ class Slider:
             track_size=(300, 6),
             pos=(50, 150)
         )
-        
-        slider = Slider(surface, style)
 
-        # Inside game loop
-        slider.update()
-        slider.input(pygame.event.get())
-
-        volume = slider.value  # → 30
+>>> slider = Slider(surface, style)
+>>> # Inside game loop
+>>> slider.update()
+>>> slider.input(pygame.event.get())
+>>> volume = slider.value  # → 30
     """
 
     def __init__(self,

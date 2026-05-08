@@ -12,18 +12,16 @@ It includes:
 - `CheckBoxList`   : Manages and renders a vertical list of checkboxes from a label list.
 
 Typical usage:
-    style = StyleCheckBox(
-        label_list=["Option A", "Option B", "Option C"],
-        checked_list=[True, False, False],
-        on_change=lambda states: print(states)
-    )
-    checkbox_list = CheckBoxList(surface, style)
-
-    # Inside game loop
-    checkbox_list.update()
-
-    # Read current states
-    states = checkbox_list.get_state_check_boxes()
+>>> style = StyleCheckBox(
+         label_list=["Option A", "Option B", "Option C"],
+         checked_list=[True, False, False],
+         on_change=lambda states: print(states)
+     )
+     checkbox_list = CheckBoxList(surface, style)
+     # Inside game loop
+     checkbox_list.update()
+     # Read current states
+     states = checkbox_list.get_state_check_boxes()
 """
 
 import pygame
@@ -42,11 +40,16 @@ class StateCheckbox(Enum):
 
     States
     ------
-    NORMAL : int
+    >>> NORMAL : int
+
         Default state — no interaction is occurring.
-    HOVER : int
+
+    >>> HOVER : int
+
         The mouse cursor is hovering over the checkbox.
-    PRESSED : int
+
+    >>> PRESSED : int
+
         The checkbox is currently being held down by the mouse.
 
     Note
@@ -63,81 +66,160 @@ class StateCheckbox(Enum):
 class StyleCheckBox:
 
     """
-    Dataclass containing all visual and behavioral configuration for a CheckBox or CheckBoxList.
+    Dataclass containing all visual and behavioral configuration
+    for a CheckBox or CheckBoxList.
 
     State-based styling
     -------------------
-    Each visual property (bg_color, border_color, label_color) has four variants
-    corresponding to the interaction state: normal, hover, pressed, and checked.
-    The checked state takes priority over all other states when the box is ticked.
+    Each visual property (bg_color, border_color, label_color)
+    has four variants corresponding to the interaction state:
+    normal, hover, pressed, and checked.
+
+    The checked state takes priority over all other states
+    when the box is ticked.
 
     Attributes
     ----------
-    label_list : List[str]
-        List of label strings, one per checkbox (used by CheckBoxList).
-    size : Vec2
-        Overall size (width, height) reserved for the checkbox component.
-    pos : Vec2
-        Position (x, y) of the first checkbox on the surface.
-    border : int
-        Border thickness in pixels. Defaults to 1.
-    border_radius : int
-        Corner radius for rounded box borders. Defaults to 0.
-    border_color : ColorType
+    >>> label_list : List[str]
+
+        List of label strings, one per checkbox
+        (used by CheckBoxList).
+
+    >>> size : Vec2
+
+        Overall size (width, height) reserved
+        for the checkbox component.
+
+    >>> pos : Vec2
+
+        Position (x, y) of the first checkbox
+        on the surface.
+
+    >>> border : int
+
+        Border thickness in pixels.
+        Defaults to 1.
+
+    >>> border_radius : int
+
+        Corner radius for rounded box borders.
+        Defaults to 0.
+
+    >>> border_color : ColorType
+
         Border color in normal state.
-    gap : int
-        Horizontal spacing between the box and its label. Defaults to 8.
-    line_height : int
-        Additional vertical spacing between checkboxes in a list. Defaults to 5.
-    font : pygame.font.Font
+
+    >>> gap : int
+
+        Horizontal spacing between the box
+        and its label.
+        Defaults to 8.
+
+    >>> line_height : int
+
+        Additional vertical spacing between
+        checkboxes in a list.
+        Defaults to 5.
+
+    >>> font : pygame.font.Font
+
         Font used to render checkbox labels.
-    antialias : bool
-        Whether to apply antialiasing to rendered labels. Defaults to True.
-    visible : bool
-        Whether the checkbox is rendered and interactive. Defaults to True.
-    checked_list : List[bool]
-        Initial checked state for each checkbox in a list.
-    on_change : Callable[[List[bool]], None], optional
-        Callback triggered when any checkbox state changes.
-        Receives the updated list of checked states.
-    on_sound : pygame.mixer.Sound, optional
+
+    >>> antialias : bool
+
+        Whether to apply antialiasing
+        to rendered labels.
+        Defaults to True.
+
+    >>> visible : bool
+
+        Whether the checkbox is rendered
+        and interactive.
+        Defaults to True.
+
+    >>> checked_list : List[bool]
+
+        Initial checked state for each
+        checkbox in a list.
+
+    >>> on_change : Callable[[List[bool]], None], optional
+
+        Callback triggered when any checkbox
+        state changes.
+        Receives the updated list
+        of checked states.
+
+    >>> on_sound : pygame.mixer.Sound, optional
+
         Sound played when a checkbox is toggled.
 
     Normal state
     ------------
-    bg_color : ColorType
-        Background color in normal state. Defaults to #ffffff.
-    check_color : ColorType
-        Checkmark color in normal state. Defaults to #333333.
-    label_color : ColorType
-        Label text color in normal state. Defaults to #222222.
+    >>> bg_color : ColorType
+
+        Background color in normal state.
+        Defaults to #ffffff.
+
+    >>> check_color : ColorType
+
+        Checkmark color in normal state.
+        Defaults to #333333.
+
+    >>> label_color : ColorType
+
+        Label text color in normal state.
+        Defaults to #222222.
 
     Hover state
     -----------
-    bg_color_hover : ColorType
-        Background color when hovered. Defaults to #f0f0f0.
-    border_color_hover : ColorType
-        Border color when hovered. Defaults to #888888.
-    label_color_hover : ColorType
-        Label color when hovered. Defaults to #222222.
+    >>> bg_color_hover : ColorType
+
+        Background color when hovered.
+        Defaults to #f0f0f0.
+
+    >>> border_color_hover : ColorType
+
+        Border color when hovered.
+        Defaults to #888888.
+
+    >>> label_color_hover : ColorType
+
+        Label color when hovered.
+        Defaults to #222222.
 
     Pressed state
     -------------
-    bg_color_pressed : ColorType
-        Background color when pressed. Defaults to #e0e0e0.
-    border_color_pressed : ColorType
-        Border color when pressed. Defaults to #555555.
-    label_color_pressed : ColorType
-        Label color when pressed. Defaults to #222222.
+    >>> bg_color_pressed : ColorType
+
+        Background color when pressed.
+        Defaults to #e0e0e0.
+
+    >>> border_color_pressed : ColorType
+
+        Border color when pressed.
+        Defaults to #555555.
+
+    >>> label_color_pressed : ColorType
+
+        Label color when pressed.
+        Defaults to #222222.
 
     Checked state
     -------------
-    bg_color_checked : ColorType
-        Background color when checked. Defaults to #4caf50.
-    border_color_checked : ColorType
-        Border color when checked. Defaults to #388e3c.
-    label_color_checked : ColorType
-        Label color when checked. Defaults to #222222.
+    >>> bg_color_checked : ColorType
+
+        Background color when checked.
+        Defaults to #4caf50.
+
+    >>> border_color_checked : ColorType
+
+        Border color when checked.
+        Defaults to #388e3c.
+
+    >>> label_color_checked : ColorType
+
+        Label color when checked.
+        Defaults to #222222.
     """
 
     # general
@@ -186,17 +268,21 @@ class StyleCheckBox:
 class CheckBox:
 
     """
-    A single interactive checkbox that renders a clickable box and a text label.
+    A single interactive checkbox that renders a clickable box
+    and a text label.
 
-    Clicking the box toggles its checked state. Colors for the background,
-    border, and label all update based on the current interaction and checked state.
-    The checked state takes visual priority over hover and pressed states.
+    Clicking the box toggles its checked state.
+    Colors for the background, border, and label all update
+    based on the current interaction and checked state.
+
+    The checked state takes visual priority over
+    hover and pressed states.
 
     Rendering order (back to front)
     --------------------------------
     1. Border   (slightly larger rect behind the box)
     2. Box      (the main checkbox square)
-    3. Label    (text rendered to the right of the box, offset by gap)
+    3. Label    (text rendered to the right of the box)
 
     State priority
     --------------
@@ -205,28 +291,43 @@ class CheckBox:
 
     Attributes
     ----------
-    surface : pygame.Surface
+    >>> surface : pygame.Surface
+
         The surface on which the checkbox is drawn.
-    style : StyleCheckBox
+
+    >>> style : StyleCheckBox
+
         The shared style/configuration object.
-    pos : Vec2
-        Position (x, y) of this specific checkbox on the surface.
-    label : str
+
+    >>> pos : Vec2
+
+        Position (x, y) of this specific checkbox
+        on the surface.
+
+    >>> label : str
+
         Text label displayed beside the checkbox box.
-    checked : bool
+
+    >>> checked : bool
+
         Initial checked state of this checkbox.
 
     Properties
     ----------
-    checked : bool
-        Returns the current checked state of the checkbox.
+    >>> checked : bool
+
+        Returns the current checked state
+        of the checkbox.
 
     Methods
     -------
-    update() -> None
-        Handles mouse interaction, toggles checked state on click,
+    >>> update() -> None
+
+        Handles mouse interaction,
+        toggles checked state on click,
         and renders the checkbox each frame.
-        Does nothing if ``StyleCheckBox.visible`` is False.
+        Does nothing if
+        ``StyleCheckBox.visible`` is False.
     """
 
     def __init__(self,
@@ -334,43 +435,57 @@ class CheckBox:
 class CheckBoxList:
 
     """
-    A vertical list of checkboxes generated from ``StyleCheckBox.label_list``.
+    A vertical list of checkboxes generated from
+    ``StyleCheckBox.label_list``.
 
-    Each label in the list becomes a separate ``CheckBox`` instance,
-    spaced vertically based on font height and line_height.
+    Each label in the list becomes a separate
+    ``CheckBox`` instance spaced vertically
+    based on font height and line_height.
+
     All checkboxes share the same style configuration.
 
     Attributes
     ----------
-    surface : pygame.Surface
+    >>> surface : pygame.Surface
+
         The surface on which all checkboxes are drawn.
-    style : StyleCheckBox
-        The style/configuration object defining labels, colors, and layout.
+
+    >>> style : StyleCheckBox
+
+        The style/configuration object defining
+        labels, colors, and layout.
 
     Methods
     -------
-    update() -> None
+    >>> update() -> None
+
         Updates and renders all checkboxes each frame.
-        Does nothing if ``StyleCheckBox.visible`` is False.
-    get_state_check_boxes() -> List[bool]
-        Returns a list of checked states for all checkboxes,
-        in the same order as ``StyleCheckBox.label_list``.
+        Does nothing if
+        ``StyleCheckBox.visible`` is False.
+
+    >>> get_state_check_boxes() -> List[bool]
+
+        Returns a list of checked states
+        for all checkboxes in the same order as
+        ``StyleCheckBox.label_list``.
 
     Example
     -------
-        style = StyleCheckBox(
-            label_list=["Enable sound", "Show FPS", "Fullscreen"],
+>>> style = StyleCheckBox(
+            label_list=[
+                "Enable sound",
+                "Show FPS",
+                "Fullscreen"
+            ],
             checked_list=[True, False, False],
             pos=(50, 100)
-        )\n
+        )
         cb_list = CheckBoxList(surface, style)
-
         # Inside game loop
         cb_list.update()
-
         # Read states
         states = cb_list.get_state_check_boxes()
-        \n → [True, False, False]
+        # -> [True, False, False]
     """
 
     def __init__(self,

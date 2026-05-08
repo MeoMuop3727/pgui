@@ -2,31 +2,36 @@
 Grid Module
 ===========
 This module provides a grid UI component built on top of pygame.
-The grid renders a configurable row/column layout with dividing lines
-and optional text notes centered inside each cell.
+
+The grid renders a configurable row/column layout
+with divider lines and optional text notes
+centered inside each cell.
 
 It includes:
-- `StyleGrid` : Dataclass holding all style/configuration options for a grid.
-- `Grid`      : Renders a grid with horizontal/vertical dividers and cell notes.
+- `StyleGrid` : Dataclass holding all visual
+                and layout configuration for a grid.
+- `Grid`      : Renders divider lines
+                and optional notes inside grid cells.
 
 Typical usage:
-    style = StyleGrid(
+    >>> style = StyleGrid(
         rows=3,
         cols=3,
         area=(500, 500),
         pos=(50, 50),
-        notes=["A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"]
+        notes=[
+            "A1", "A2", "A3",
+            "B1", "B2", "B3"
+        ]
     )
     grid = Grid(surface, style)
-
     # Inside game loop
     grid.update()
-
     # Or use rect directly
     style = StyleGrid(
-        rows=3,
-        cols=3,
-        rect=pygame.Rect(50, 50, 500, 500)
+        rows=4,
+        cols=4,
+        rect=pygame.Rect(50, 50, 400, 400)
     )
 """
 
@@ -46,38 +51,73 @@ class StyleGrid:
 
     Position
     --------
-    Position and area can be specified in two ways:
-    - ``pos`` + ``area`` : explicit position and size.
-    - ``rect``           : a pygame.Rect that overrides pos and area if provided.
+    The grid position and size can be specified in two ways:
+
+    - ``pos`` + ``area`` :
+        Explicit top-left position and total grid size.
+
+    - ``rect`` :
+        A pygame.Rect that overrides both ``pos`` and ``area``.
+
+    Grid layout
+    -----------
+    The grid is divided into equal-sized cells based on ``rows`` and ``cols``.
+
+    Divider lines are automatically generated between cells.
+
+    Optional notes can be rendered centered inside each cell, filled left-to-right and top-to-bottom.
 
     Attributes
     ----------
-    rows : int
+    >>> rows : int
+
         Number of rows in the grid. Defaults to 3.
-    cols : int
+
+    >>> cols : int
+
         Number of columns in the grid. Defaults to 3.
-    pos : Vec2
-        Position (x, y) of the grid top-left corner. Defaults to (0, 0).
-    area : Vec2
-        Size (width, height) of the entire grid. Defaults to (500, 500).
-    rect : pygame.Rect, optional
-        If provided, overrides ``pos`` and ``area`` with rect.topleft and rect.size.
-    visible : bool
+
+    >>> pos : Vec2
+
+        Position (x, y) of the grid top-left corner.
+
+    >>> area : Vec2
+
+        Total size (width, height) of the grid.
+
+    >>> rect : pygame.Rect, optional
+
+        Overrides both ``pos`` and ``area`` when provided.
+
+    >>> visible : bool
+
         Whether the grid is rendered. Defaults to True.
-    line_color : ColorType
-        Color of the row and column divider lines. Defaults to #333333.
-    line_weight : int
-        Thickness of the divider lines in pixels. Defaults to 3.
-    notes : List[str]
-        Text labels rendered centered inside each cell, filled left-to-right
-        row by row. If fewer notes than cells are provided, remaining cells
-        are left empty.
-    font : pygame.font.Font
-        Font used to render cell notes.
-    antialias : bool
-        Whether to apply antialiasing to rendered notes. Defaults to True.
-    color : ColorType
-        Text color of cell notes. Defaults to #333333.
+
+    >>> line_color : ColorType
+
+        Color of divider lines.
+
+    >>> line_weight : int
+
+        Thickness of divider lines in pixels.
+
+    >>> notes : List[str]
+
+        Text labels rendered centered inside each cell.
+        Notes are filled left-to-right, top-to-bottom.
+        Remaining cells stay empty if fewer notes are provided.
+
+    >>> font : pygame.font.Font
+
+        Font used to render notes.
+
+    >>> antialias : bool
+
+        Whether note text rendering uses antialiasing.
+
+    >>> color : ColorType
+
+        Text color of notes.
     """
 
     rows: int = 3
@@ -102,59 +142,80 @@ class StyleGrid:
 class Grid:
 
     """
-    A grid component that renders horizontal and vertical divider lines
-    and optional centered text notes inside each cell.
+    A grid component that renders
+    horizontal and vertical divider lines
+    with optional centered notes inside cells.
 
-    The grid is divided into equal-sized cells based on ``rows`` and ``cols``.
-    Divider lines are drawn between cells — row lines run horizontally,
-    column lines run vertically. Notes are distributed left-to-right,
-    top-to-bottom across all cells.
+    The grid is divided into equal-sized cells
+    based on ``rows`` and ``cols``.
+
+    Divider lines separate rows and columns,
+    while notes are rendered centered
+    inside each cell.
+
+    Notes are distributed
+    left-to-right
+    and top-to-bottom.
 
     Position resolution
     -------------------
-    If ``StyleGrid.rect`` is provided, it takes priority over
+    If ``StyleGrid.rect`` is provided,
+    it overrides both
     ``StyleGrid.pos`` and ``StyleGrid.area``.
 
     Rendering order (back to front)
     --------------------------------
-    1. Row dividers     (horizontal lines between rows)
-    2. Column dividers  (vertical lines between columns)
-    3. Notes            (text centered inside each cell)
+    1. Row dividers
+    (horizontal lines between rows)
+
+    2. Column dividers
+    (vertical lines between columns)
+
+    3. Notes
+    (text centered inside cells)
 
     Cell size calculation
     ---------------------
-    - ``width_cell``  = area[0] // cols
-    - ``height_cell`` = area[0] // rows  (uses width axis — see note below)
+    >>> width_cell  = area[0] // cols
+
+    >>> height_cell = area[0] // rows
 
     Attributes
     ----------
-    surface : pygame.Surface
+    >>> surface : pygame.Surface
+
         The surface on which the grid is drawn.
-    style : StyleGrid
+
+    >>> style : StyleGrid
+
         The style/configuration object for this grid.
 
     Methods
     -------
-    update() -> None
-        Draws all divider lines and cell notes each frame.
+    >>> update() -> None
+
+        Draws divider lines and notes each frame.
         Does nothing if ``StyleGrid.visible`` is False.
-    get_size_cel() -> Vec2
-        Returns the size (width, height) of a single cell.
-        Calculated as (area[0] // cols, area[0] // rows).
+
+    >>> get_size_cel() -> Vec2
+
+        Returns the size of a single cell.
+        Format: ``(width, height)``
 
     Example
     -------
-        style = StyleGrid(
+>>> style = StyleGrid(
             rows=4,
             cols=4,
             area=(400, 400),
             pos=(100, 100),
             line_color="#aaaaaa",
-            notes=["Mon", "Tue", "Wed", "Thu"]
+            notes=[
+                "Mon", "Tue",
+                "Wed", "Thu"
+            ]
         )
-
         grid = Grid(surface, style)
-
         # Inside game loop
         grid.update()
     """

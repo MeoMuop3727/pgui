@@ -10,10 +10,10 @@ It includes:
 - `Panel`      : Renders a styled container and delegates rendering to registered child objects.
 
 Typical usage:
-    def render_content(surface: pygame.Surface):
+>>> def render_content(surface: pygame.Surface):
         pygame.draw.circle(surface, (255, 0, 0), (50, 50), 20)
 
-    style = StylePanel(
+>>> style = StylePanel(
         pos=(100, 100),
         size=(400, 300),
         bg_color="#ffffff",
@@ -22,7 +22,6 @@ Typical usage:
     )
     panel = Panel(surface, style)
     panel.objects.append(render_content)
-
     # Inside game loop
     panel.update()
 """
@@ -92,36 +91,39 @@ class Panel:
 
     Attributes
     ----------
-    surface : pygame.Surface
+>>> surface : pygame.Surface
+    
         The main surface on which the panel frame is drawn.
-    style : StylePanel
+>>> style : StylePanel
+    
         The style/configuration object for this panel.
-    objects : list[Callable[[pygame.Surface], None]]
+>>> objects : list[Callable[[pygame.Surface], None]]
+    
         List of render functions to call each frame.
         Each function receives the panel's subsurface as its argument.
         Add child render functions here to draw inside the panel.
 
     Methods
     -------
-    update() -> None
+>>> update() -> None
+    
         Draws the border, background, and all registered child objects each frame.
         Does nothing if ``StylePanel.visible`` is False.
-    get_subsurface(self) -> pygame.Surface
+
+>>> get_subsurface(self) -> pygame.Surface
+
         Return the surface which will be used to draw the objects
 
     Example
     -------
-        def draw_hud(surface: pygame.Surface):
+>>> def draw_hud(surface: pygame.Surface):
             pygame.draw.rect(surface, (255, 0, 0), (10, 10, 50, 20))
 
-        style = StylePanel(pos=(50, 50), size=(300, 200), bg_color="#1a1a1a")
+>>> style = StylePanel(pos=(50, 50), size=(300, 200), bg_color="#1a1a1a")
         panel = Panel(screen, style)
         panel.objects.append(draw_hud)
-
         # Inside game loop
-        panel.update()
-        # draw_hud sẽ nhận subsurface của panel
-        # nên (10, 10) là relative so với góc trên trái panel
+        panel.update() # draw_hud will claim the subsurface of panel
     """
     
     def __init__(self,

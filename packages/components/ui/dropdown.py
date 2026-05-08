@@ -4,26 +4,28 @@ Dropdown Module
 This module provides a dropdown selection UI component built on top of pygame,
 using ButtonText internally to render each selectable option in the list.
 
-The dropdown consists of a clickable header that toggles an option list open or closed.
-Selecting an item updates the header label and closes the list automatically.
+The dropdown consists of a clickable header that toggles
+an option list open or closed.
+
+Selecting an item updates the header label
+and closes the list automatically.
 
 It includes:
 - `StateDropdown`  : Enum defining the visual states of the dropdown header.
 - `StyleDropdown`  : Dataclass holding all style/configuration options for a dropdown.
-- `Dropdown`       : Renders an interactive dropdown with a header and collapsible option list.
+- `Dropdown`       : Renders an interactive dropdown with a header
+                     and collapsible option list.
 
 Typical usage:
-    style = StyleDropdown(
+>>> style = StyleDropdown(
         options=["Option A", "Option B", "Option C"],
         selected_index=0,
         size=(200, 40),
         pos=(100, 100)
     )
     dropdown = Dropdown(surface, style)
-
     # Inside game loop
     dropdown.update()
-
     # Read current selection
     value = dropdown.get_selected_item()
 """
@@ -46,16 +48,23 @@ class StateDropdown(Enum):
 
     States
     ------
-    NORMAL : int
+    >>> NORMAL : int
+
         Default state — no interaction is occurring.
-    HOVER : int
+
+    >>> HOVER : int
+
         The mouse cursor is hovering over the header.
-    PRESSED : int
+
+    >>> PRESSED : int
+
         The header is currently being held down by the mouse.
-    OPEN : int
+
+    >>> OPEN : int
+
         The dropdown list is currently open and visible.
         Takes visual priority over all other states.
-    """
+"""
 
     NORMAL = 1
     HOVER = 2
@@ -66,69 +75,185 @@ class StateDropdown(Enum):
 class StyleDropdown:
 
     """
-    Dataclass containing all visual and behavioral configuration for a Dropdown.
+    Dataclass containing all visual and behavioral configuration
+    for a Dropdown.
 
     Layout
     ------
     The dropdown is divided into two parts:
-    - Header : always visible, shows the selected item or placeholder text.
-    - List   : shown below the header when open, contains all selectable options.
+
+    - Header : always visible,
+            shows the selected item or placeholder text.
+
+    - List   : shown below the header when open,
+            contains all selectable options.
 
     State-based styling
     -------------------
-    The header supports four visual states: normal, hover, pressed, and open.
-    Each option item supports three states: normal, hover, pressed, and selected.
-    The selected state takes priority over all others for the active item.
+    The header supports four visual states:
+    normal, hover, pressed, and open.
+
+    Each option item supports four states:
+    normal, hover, pressed, and selected.
+
+    The selected state takes priority over all others
+    for the active item.
 
     Attributes
     ----------
-    options : List[str]
+    >>> options : List[str]
+
         The list of selectable option labels.
-    selected_index : int
-        Index of the initially selected option. Defaults to 0.
-    placeholder : str
-        Text shown in the header when no option is selected or options is empty.
 
-    size : Vec2
-        Size (width, height) of the header and each option item.
-    pos : Vec2
-        Position (x, y) of the dropdown header on the surface.
-    padding : int
-        Inner horizontal spacing between the header edge and the label text.
-    gap : int
-        Vertical spacing between each option item in the list.
+    >>> selected_index : int
 
-    border : int
-        Border thickness in pixels. Defaults to 1.
-    border_radius : int
-        Corner radius for rounded borders. Defaults to 0.
+        Index of the initially selected option.
+        Defaults to 0.
 
-    font : pygame.font.Font
-        Font used for the header label and all option items.
-    antialias : bool
-        Whether to apply antialiasing to rendered text. Defaults to True.
-    visible : bool
-        Whether the dropdown is rendered and interactive. Defaults to True.
-    on_sound_open : pygame.mixer.Sound, optional
-        Sound played when the dropdown is toggled open or closed.
-    on_sound_select : pygame.mixer.Sound, optional
+    >>> placeholder : str
+
+        Text shown in the header when no option
+        is selected or options is empty.
+
+    >>> size : Vec2
+
+        Size (width, height) of the header
+        and each option item.
+
+    >>> pos : Vec2
+
+        Position (x, y) of the dropdown header
+        on the surface.
+
+    >>> padding : int
+
+        Inner horizontal spacing between
+        the header edge and the label text.
+
+    >>> gap : int
+
+        Vertical spacing between each option item
+        in the list.
+
+    >>> border : int
+
+        Border thickness in pixels.
+        Defaults to 1.
+
+    >>> border_radius : int
+
+        Corner radius for rounded borders.
+        Defaults to 0.
+
+    >>> font : pygame.font.Font
+
+        Font used for the header label
+        and all option items.
+
+    >>> antialias : bool
+
+        Whether to apply antialiasing
+        to rendered text.
+        Defaults to True.
+
+    >>> visible : bool
+
+        Whether the dropdown is rendered
+        and interactive.
+        Defaults to True.
+
+    >>> on_sound_open : pygame.mixer.Sound, optional
+
+        Sound played when the dropdown
+        is toggled open or closed.
+
+    >>> on_sound_select : pygame.mixer.Sound, optional
+
         Sound played when an option is selected.
 
-    Header states  (normal / hover / pressed / open)
-    -------------------------------------------------
-    header_color, header_color_hover, header_color_pressed, header_color_open
-        Header label text color per state.
-    header_bg_color, header_bg_color_hover, header_bg_color_pressed, header_bg_color_open
-        Header background color per state.
-    header_border_color, header_border_color_hover, header_border_color_pressed, header_border_color_open
-        Header border color per state.
+    Header states
+    -------------
+    >>> header_color
 
-    Item states  (normal / hover / pressed / selected)
-    ---------------------------------------------------
-    item_color, item_color_hover, item_color_pressed, item_color_selected
-        Option item text color per state.
-    item_bg_color, item_bg_color_hover, item_bg_color_pressed, item_bg_color_selected
-        Option item background color per state.
+        Header label text color in normal state.
+
+    >>> header_color_hover
+
+        Header label text color when hovered.
+
+    >>> header_color_pressed
+
+        Header label text color when pressed.
+
+    >>> header_color_open
+
+        Header label text color when open.
+
+    >>> header_bg_color
+
+        Header background color in normal state.
+
+    >>> header_bg_color_hover
+
+        Header background color when hovered.
+
+    >>> header_bg_color_pressed
+
+        Header background color when pressed.
+
+    >>> header_bg_color_open
+
+        Header background color when open.
+
+    >>> header_border_color
+
+        Header border color in normal state.
+
+    >>> header_border_color_hover
+
+        Header border color when hovered.
+
+    >>> header_border_color_pressed
+
+        Header border color when pressed.
+
+    >>> header_border_color_open
+
+        Header border color when open.
+
+    Item states
+    -----------
+    >>> item_color
+
+        Option item text color in normal state.
+
+    >>> item_color_hover
+
+        Option item text color when hovered.
+
+    >>> item_color_pressed
+
+        Option item text color when pressed.
+
+    >>> item_color_selected
+
+        Option item text color when selected.
+
+    >>> item_bg_color
+
+        Option item background color in normal state.
+
+    >>> item_bg_color_hover
+
+        Option item background color when hovered.
+
+    >>> item_bg_color_pressed
+
+        Option item background color when pressed.
+
+    >>> item_bg_color_selected
+
+        Option item background color when selected.
     """
 
     # content
@@ -194,56 +319,80 @@ class StyleDropdown:
 class Dropdown:
 
     """
-    An interactive dropdown component with a toggleable option list.
+    An interactive dropdown component
+    with a toggleable option list.
 
-    Clicking the header opens or closes the option list. Clicking an option
-    selects it, updates the header label, and closes the list. The header
-    and each option item update their colors based on the current visual state.
+    Clicking the header opens or closes
+    the option list.
+
+    Clicking an option selects it,
+    updates the header label,
+    and closes the list.
+
+    The header and each option item update
+    their colors based on the current visual state.
 
     Rendering order (back to front)
     --------------------------------
-    1. Header border   (slightly larger rect behind the header)
+    1. Header border
+    (slightly larger rect behind the header)
+
     2. Header background
-    3. Header label    (selected item or placeholder, left-aligned with padding)
-    4. Option list     (rendered below the header when open, one ButtonText per item)
+
+    3. Header label
+    (selected item or placeholder,
+    left-aligned with padding)
+
+    4. Option list
+    (rendered below the header,
+    one ButtonText per item)
 
     State priority
     --------------
-    OPEN state overrides hover and pressed for the header,
-    ensuring the open appearance is visually distinct from interaction states.
+    OPEN state overrides hover and pressed
+    for the header, ensuring the open appearance
+    is visually distinct from interaction states.
 
     Attributes
     ----------
-    surface : pygame.Surface
+    >>> surface : pygame.Surface
+
         The surface on which the dropdown is drawn.
-    style : StyleDropdown
-        The style/configuration object for this dropdown.
+
+    >>> style : StyleDropdown
+
+        The style/configuration object
+        for this dropdown.
 
     Methods
     -------
-    update() -> None
-        Handles mouse interaction, toggles the list open/closed,
-        and renders the header and option list each frame.
+    >>> update() -> None
+
+        Handles mouse interaction,
+        toggles the list open/closed,
+        and renders the header and option list
+        each frame.
         Does nothing if ``StyleDropdown.visible`` is False.
-    get_selected_item() -> str
-        Returns the string value of the currently selected option.
+
+    >>> get_selected_item() -> str
+
+        Returns the string value
+        of the currently selected option.
 
     Example
     -------
-        style = StyleDropdown(
+>>> style = StyleDropdown(
             options=["Easy", "Medium", "Hard"],
             selected_index=1,
             size=(200, 40),
             pos=(100, 200)
         )
-        
         dropdown = Dropdown(surface, style)
-
         # Inside game loop
         dropdown.update()
-
         # Read selection
-        difficulty = dropdown.get_selected_item()  # → "Medium"
+        difficulty = dropdown.get_selected_item()
+        # -> "Medium"
     """
 
     def __init__(self,

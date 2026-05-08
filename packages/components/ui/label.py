@@ -10,7 +10,7 @@ It includes:
 - `Label`      : Renders a styled text label with a background frame and optional border.
 
 Typical usage:
-    style = StyleLabel(
+>>> style = StyleLabel(
         content="Hello World",
         color="#ffffff",
         bg_color="#333333",
@@ -18,10 +18,8 @@ Typical usage:
         pos=(100, 100)
     )
     label = Label(surface, style)
-
     # Inside game loop
     label.update()
-
     # Update text dynamically
     label.content = "New Text"
 """
@@ -93,26 +91,31 @@ class Label:
 
     Attributes
     ----------
-    surface : pygame.Surface
+>>> surface : pygame.Surface
+    
         The surface on which the label is drawn.
-    style : StyleLabel
+    
+>>> style : StyleLabel
+    
         The style/configuration object for this label.
 
     Properties
     ----------
-    content : str
+>>> content : str
+    
         Gets or sets the text displayed inside the label.
         Changes are reflected immediately on the next ``update()`` call.
 
     Methods
     -------
-    update() -> None
+>>> update() -> None
+    
         Draws the border, background frame, and centered text each frame.
         Does nothing if ``StyleLabel.visible`` is False.
 
     Example
     -------
-        style = StyleLabel(
+>>> style = StyleLabel(
             content="Score: 0",
             color="#ffffff",
             bg_color="#222222",
@@ -120,10 +123,8 @@ class Label:
             pos=(10, 10)
         )
         label = Label(surface, style)
-
         # Inside game loop
         label.update()
-
         # Update dynamically
         label.content = f"Score: {score}"
     """

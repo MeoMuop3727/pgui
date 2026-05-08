@@ -11,13 +11,12 @@ It includes:
 - `ButtonImage`  : A button that renders images based on its current state.
 
 Typical usage:
-    style = StyleButton(
+>>> style = StyleButton(
         content="Start",
         bg_color="#ffffff",
         on_click=lambda: print("clicked")
     )
     button = ButtonText(surface, style)
-
     # Inside game loop
     button.update()
 """
@@ -38,13 +37,20 @@ class StateButton(Enum):
 
     States
     ------
-    NORMAL : int
+    >>> NORMAL : int
+
         Default state — no interaction is occurring.
-    PRESSED : int
+
+    >>> PRESSED : int
+
         The button is currently being held down by the mouse.
-    DISABLE : int
+
+    >>> DISABLE : int
+
         The button is inactive and does not respond to any interaction.
-    HOVER : int
+
+    >>> HOVER : int
+
         The mouse cursor is hovering over the button.
     """
 
@@ -62,74 +68,132 @@ class StyleButton:
     State-based styling
     -------------------
     Each visual property (color, bg_color, border_color, image) has four variants
-    corresponding to the button's state: normal, hover, pressed, and disable.
+    corresponding to the button's state:
+    - normal
+    - hover
+    - pressed
+    - disable
 
     Attributes
     ----------
-    color : ColorType
+    >>> color : ColorType
+
         Text color in normal state.
-    bg_color : ColorType
+
+    >>> bg_color : ColorType
+
         Background color in normal state.
-    border_color : ColorType
+
+    >>> border_color : ColorType
+
         Border color in normal state.
-    image : pygame.Surface, optional
+
+    >>> image : pygame.Surface, optional
+
         Image displayed in normal state (used by ButtonImage).
 
-    color_hover : ColorType
+    >>> color_hover : ColorType
+
         Text color when hovered.
-    bg_color_hover : ColorType
+
+    >>> bg_color_hover : ColorType
+
         Background color when hovered.
-    border_color_hover : ColorType
+
+    >>> border_color_hover : ColorType
+
         Border color when hovered.
-    image_hover : pygame.Surface, optional
+
+    >>> image_hover : pygame.Surface, optional
+
         Image displayed when hovered.
 
-    color_pressed : ColorType
+    >>> color_pressed : ColorType
+
         Text color when pressed.
-    bg_color_pressed : ColorType
+
+    >>> bg_color_pressed : ColorType
+
         Background color when pressed.
-    border_color_pressed : ColorType
+
+    >>> border_color_pressed : ColorType
+
         Border color when pressed.
-    image_pressed : pygame.Surface, optional
+
+    >>> image_pressed : pygame.Surface, optional
+
         Image displayed when pressed.
 
-    color_disable : ColorType
+    >>> color_disable : ColorType
+
         Text color when disabled.
-    bg_color_disable : ColorType
+
+    >>> bg_color_disable : ColorType
+
         Background color when disabled.
-    border_color_disable : ColorType
+
+    >>> border_color_disable : ColorType
+
         Border color when disabled.
-    image_disable : pygame.Surface, optional
+
+    >>> image_disable : pygame.Surface, optional
+
         Image displayed when disabled.
 
     General
     -------
-    on_click : Callable, optional
+
+    >>> on_click : Callable, optional
+
         Callback function triggered when the button is clicked.
-    on_sound : pygame.mixer.Sound, optional
+
+    >>> on_sound : pygame.mixer.Sound, optional
+
         Sound played when the button is clicked.
-    on_hover : (...)
+
+    >>> on_hover : Callable, optional
+
         Callback function triggered when the button is hovered.
-    state : StateButton
-        Initial state of the button. Defaults to NORMAL.
-    visible : bool
-        Whether the button is rendered and interactive. Defaults to True.
-    transition : int
-        Transition duration in milliseconds (reserved for future use).
-    pos : Vec2
+
+    >>> state : StateButton
+
+        Initial state of the button.
+
+    >>> visible : bool
+
+        Whether the button is rendered and interactive.
+
+    >>> transition : int
+
+        Transition duration in milliseconds.
+
+    >>> pos : Vec2
+
         Position (x, y) of the button on the surface.
-    size : Vec2
+
+    >>> size : Vec2
+
         Size (width, height) of the button.
-    border : int
+
+    >>> border : int
+
         Border thickness in pixels.
-    border_radius : int
+
+    >>> border_radius : int
+
         Corner radius for rounded borders.
-    font : pygame.font.Font
+
+    >>> font : pygame.font.Font
+
         Font used to render button text.
-    content : str
+
+    >>> content : str
+
         Text label displayed on the button.
-    antialias : bool
-        Whether to apply antialiasing to the rendered text.
+
+    >>> antialias : bool
+
+        Whether to apply antialiasing to rendered text.
     """
 
     # normal
@@ -176,54 +240,99 @@ class Button:
     """
     Base class for all button types in the button system.
 
-    Provides shared logic for mouse interaction (hover, press, click)
-    and visual state management. Intended to be subclassed — `update()`
-    is a no-op by default and should be overridden by subclasses to
-    handle rendering.
+    Provides shared logic for:
+    - hover detection
+    - press detection
+    - click handling
+    - visual state management
+
+    Intended to be subclassed.
+    `update()` is a no-op by default and should be overridden.
 
     Attributes
     ----------
-    surface : pygame.Surface
+    >>> surface : pygame.Surface
+
         The surface on which the button is drawn.
-    style : StyleButton
+
+    >>> style : StyleButton
+
         The style/configuration object for this button.
-    is_hover : bool
+
+    >>> is_hover : bool
+
         Whether the mouse is currently hovering over the button.
-    is_pressed : bool
+
+    >>> is_pressed : bool
+
         Whether the button is currently being pressed.
-    pos : Vec2
+
+    >>> pos : Vec2
+
         Position (x, y) of the button.
-    size : Vec2
+
+    >>> size : Vec2
+
         Size (width, height) of the button.
-    rect : pygame.Rect
-        The bounding rectangle of the button.
-    state : StateButton
-        The current state of the button (NORMAL, HOVER, PRESSED, DISABLE).
+
+    >>> rect : pygame.Rect
+
+        Bounding rectangle of the button.
+
+    >>> state : StateButton
+
+        Current visual state of the button.
 
     Properties
     ----------
-    pos_button : Vec2
-        Gets or sets the button position and updates the rect accordingly.
-    size_button : Vec2
-        Gets or sets the button size and updates the rect accordingly.
-    rect_button : pygame.Rect
+
+    >>> pos_button : Vec2
+
+        Gets or sets the button position.
+
+        Notes:
+            - Updates rect automatically.
+
+    >>> size_button : Vec2
+
+        Gets or sets the button size.
+
+        Notes:
+            - Updates rect automatically.
+
+    >>> rect_button : pygame.Rect
+
         Gets or sets the button bounding rect directly.
 
     Methods
     -------
-    get_visual_state() -> StateButton
-        Returns the current visual state based on hover/press/disable flags.
-    update() -> None
-        No-op in base class. Override in subclasses to handle rendering.
+
+    >>> get_visual_state() -> StateButton
+
+        Returns the current visual state based on:
+        - hover state
+        - pressed state
+        - disable state
+
+    >>> update() -> None
+
+        Base no-op update method.
+
+        Notes:
+            - Must be overridden in subclasses.
 
     Example
     -------
-        # Not meant to be used directly — use ButtonText or ButtonImage instead.
-        style = StyleButton(pos=(100, 100), size=(200, 50))
-        button = ButtonText(surface, style)
 
-        # Inside game loop
-        button.update()
+    >>> style = StyleButton(
+    ...     pos=(100, 100),
+    ...     size=(200, 50)
+    ... )
+    >>>
+    >>> button = ButtonText(surface, style)
+    >>>
+    >>> # Inside game loop
+    >>> button.update()
     """
 
     def __init__(self,
@@ -279,30 +388,57 @@ class Button:
 class ButtonText(Button):
 
     """
-    A button that renders text with a styled background and border.
+    A button that renders styled text with background and border.
 
-    Inherits all state and interaction logic from `Button`.
-    On each `update()` call, it determines the current visual state
-    and draws the border, background, and text accordingly.
+    Inherits:
+    - hover handling
+    - press handling
+    - click handling
+    - state management
 
     Rendering order (back to front)
-    --------------------------------
-    1. Border  (slightly larger rect behind the button)
+    -------------------------------
+
+    1. Border
+        Slightly larger rect behind the button.
+
     2. Background
-    3. Text    (centered within the button rect)
+        Main button background.
+
+    3. Text
+        Centered text rendered inside button rect.
+
+    Methods
+    -------
+
+    >>> update() -> None
+
+        Updates interaction state and renders the button.
+
+        Rendering steps:
+            1. Border
+            2. Background
+            3. Text
+
+        Notes:
+            - Does nothing if ``style.visible`` is False.
+            - Triggers ``on_click`` when released inside button.
+            - Plays ``on_sound`` if defined.
 
     Example
     -------
-        style = StyleButton(
-            content="Play",
-            bg_color="#3a3a3a",
-            bg_color_hover="#5a5a5a",
-            on_click=lambda: start_game()
-        )
-        btn = ButtonText(surface, style)
 
-        # Inside game loop
-        btn.update()
+    >>> style = StyleButton(
+    ...     content="Play",
+    ...     bg_color="#3a3a3a",
+    ...     bg_color_hover="#5a5a5a",
+    ...     on_click=lambda: start_game()
+    ... )
+    >>>
+    >>> btn = ButtonText(surface, style)
+    >>>
+    >>> # Inside game loop
+    >>> btn.update()
     """
 
     def __init__(self,
@@ -397,30 +533,51 @@ class ButtonImage(Button):
     """
     A button that renders an image based on its current visual state.
 
-    Inherits all state and interaction logic from `Button`.
-    On each `update()` call, it loads and scales the appropriate image
-    from `StyleButton` and blits it centered on the button rect.
+    Inherits:
+    - hover handling
+    - press handling
+    - click handling
+    - state management
 
-    If the image for the current state is None, rendering is skipped.
+    If the image for the current state is None,
+    rendering is skipped.
 
     Image loading
     -------------
-    Images are loaded and scaled to `self.size` on every `update()` call.
-    For better performance, consider pre-loading and caching images externally
-    before passing them into `StyleButton`.
+
+    Images are loaded and scaled to ``self.size``
+    on every ``update()`` call.
+
+    Notes:
+        - For better performance, pre-load images externally.
+        - Cached surfaces are recommended for large UI systems.
+
+    Methods
+    -------
+
+    >>> update() -> None
+
+        Updates interaction state and renders image.
+
+        Notes:
+            - Does nothing if ``style.visible`` is False.
+            - Current image depends on visual state.
+            - Image is centered inside button rect.
 
     Example
     -------
-        style = StyleButton(
-            image="assets/btn_normal.png",
-            image_hover="assets/btn_hover.png",
-            image_pressed="assets/btn_pressed.png",
-            on_click=lambda: open_menu()
-        )
-        btn = ButtonImage(surface, style)
 
-        # Inside game loop
-        btn.update()
+    >>> style = StyleButton(
+    ...     image="assets/btn_normal.png",
+    ...     image_hover="assets/btn_hover.png",
+    ...     image_pressed="assets/btn_pressed.png",
+    ...     on_click=lambda: open_menu()
+    ... )
+    >>>
+    >>> btn = ButtonImage(surface, style)
+    >>>
+    >>> # Inside game loop
+    >>> btn.update()
     """
 
     def __init__(self,
@@ -472,5 +629,3 @@ class ButtonImage(Button):
         image = pygame.transform.scale(image, self.size)
 
         return image
-
-

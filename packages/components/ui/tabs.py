@@ -11,17 +11,16 @@ It includes:
 - `Tab`       : Top-level component combining `TabPanel` and `TabFrame` into one widget.
 
 Typical usage:
-    def render_home(surface): ...
-    def render_settings(surface): ...
+>>> def render_home(surface): ...
+>>> def render_settings(surface): ...
 
-    style = StyleTab(
+>>> style = StyleTab(
         tabs_list=["Home", "Settings"],
         tabs_func=[render_home, render_settings],
         tab_panel_type="horizontal",
         size=(700, 500)
     )
     tab = Tab(surface, style)
-
     # Inside game loop
     tab.update()
 """
@@ -142,18 +141,25 @@ class TabPanel:
 
     Attributes
     ----------
-    surface : pygame.Surface
+>>> surface : pygame.Surface
+
         The surface on which tab buttons are drawn.
-    style : StyleTab
+>>> style : StyleTab
+
         The style/configuration object for this tab panel.
 
     Methods
     -------
-    update() -> None
+>>> update() -> None
+
         Draws and updates all tab buttons each frame.
-    get_size_tab_panel() -> Vec2
+
+>>> get_size_tab_panel() -> Vec2
+
         Returns the size (width, height) of a single tab button.
-    get_tab_panel_active() -> int
+
+>>> get_tab_panel_active() -> int
+
         Returns the index of the currently active tab.
     """
 
@@ -243,16 +249,21 @@ class TabFrame:
 
     Attributes
     ----------
-    surface : pygame.Surface
+>>> surface : pygame.Surface
+
         The surface on which the frame is drawn.
-    style : StyleTab
+>>> style : StyleTab
+
         The style/configuration object for this tab frame.
 
     Methods
     -------
-    update(active_tab: int) -> None
+>>> update(active_tab: int) -> None
+
         Redraws the frame background and invokes the active tab's render function.
-    get_pos_surface_frame_content() -> Vec2
+
+>>> get_pos_surface_frame_content() -> Vec2
+
         Returns the top-left position of the content frame on the surface.
     """
 
@@ -319,24 +330,25 @@ class Tab:
 
     Attributes
     ----------
-    style : StyleTab
+>>> style : StyleTab
+
         The style/configuration object controlling layout and appearance.
 
     Methods
     -------
-    update() -> None
+>>> update() -> None
+
         Updates and renders both the tab panel and the content frame each frame.
         Does nothing if `StyleTab.visible` is False.
 
     Example
     -------
-        style = StyleTab(
+>>> style = StyleTab(
             tabs_list=["Home", "Settings"],
             tabs_func=[render_home, render_settings],
             size=(700, 500)
         )
         tab = Tab(surface, style)
-
         # Inside game loop
         tab.update()
     """

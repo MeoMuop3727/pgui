@@ -1,36 +1,28 @@
 import pygame
 import numpy as np
 
-from dataclasses import dataclass
-from typing import Callable, Optional, Literal, List, Tuple, Union
+from dataclasses import dataclass, field
+from typing import Callable, Optional, Literal, List
+from enum import Enum
+from packages.utils.utils_typing import Vec2, ColorType
 
-# ==========================================================
-# TYPE + UTILS (self-contained)
-# ==========================================================
-Vec2 = Tuple[int, int]
-ColorType = Union[str, Tuple[int, int, int]]
+from packages.utils.utils_transform import hex_to_rbg, to_array
 
-
-def to_array(v: Vec2) -> np.ndarray:
-    return np.array(v, dtype=float)
-
-
-def hex_to_rbg(color: ColorType) -> Tuple[int, int, int]:
-    if isinstance(color, tuple):
-        return color
-    color = color.lstrip("#")
-    return tuple(int(color[i:i+2], 16) for i in (0, 2, 4))
-
-
-# ==========================================================
-# STYLE SCROLL VIEW
-# ==========================================================
+class StateScrollbar(Enum):
+    NORMAL = 1
+    HOVER = 2
+    PRESSED = 3
+    ACTIVE = 4
 @dataclass(slots=True)
 class StyleScrollView:
     pos: Vec2 = (0, 0)
     size: Vec2 = (300, 300)
 
     content_size: Vec2 = (300, 800)
+
+    border_radius: int = 0
+
+    scrollbar_border_radius: int = 0
 
     direction: Literal["vertical", "horizontal"] = "vertical"
 
@@ -46,50 +38,45 @@ class StyleScrollView:
     scrollbar_color: ColorType = "#999999"
     scrollbar_color_hover: ColorType = "#777777"
     scrollbar_color_active: ColorType = "#555555"
-
-
-# ==========================================================
-# SCROLL VIEW
-# ==========================================================
+    scrollbar_color_pressed: ColorType = "#555555"
 class ScrollView:
-    def __init__(
-        self,
-        surface: pygame.Surface,
-        style: StyleScrollView,
-        render_func: Optional[Callable[[pygame.Surface, np.ndarray], None]] = None
-    ):
+    def __init__(self,
+                 surface: pygame.Surface,
+                 style: StyleScrollView, 
+                 render_func: Optional[Callable[[pygame.Surface, np.ndarray], None]] = None):
         self.__surface = surface
         self.__style = style
         self.__render_func = render_func
 
         self.__offset = np.array([0.0, 0.0])
 
-        self.__viewport_rect = pygame.Rect(0, 0, 0, 0)
-        self.__scrollbar_rect = pygame.Rect(0, 0, 0, 0)
+        self.__viewport_rect = pygame.Rect(self.__style.pos, self.__style.size)
+        self.__scrollbar_rect = pygame.Rect(0,0,0,0)
 
         self.__dragging = False
         self.__hovered = False
+        self.__pressed = False
 
-    # ================= PRIVATE =================
-    def __build_rect(self):
-        pos = to_array(self.__style.pos)
-        size = to_array(self.__style.size)
+    def update(self):
+        if self.__style.visible:
+            self.__handle_wheel()
+            self.__handle_drag()
+            self.__clamp_offset()
+            self.__build_scrollbar()
 
-        self.__viewport_rect = pygame.Rect(
-            int(pos[0]), int(pos[1]),
-            int(size[0]), int(size[1])
-        )
-
+            self.__draw_bg()
+            self.__draw_content()
+            self.__draw_scrollbar()
+            
     def __handle_wheel(self):
         mouse = pygame.mouse.get_pos()
-        if not self.__viewport_rect.collidepoint(mouse):
-            return
+        if not self.__viewport_rect.collidepoint(mouse): return
 
         for e in pygame.event.get(pygame.MOUSEWHEEL):
             if self.__style.direction == "vertical":
                 self.__offset[1] -= e.y * self.__style.scroll_speed
             else:
-                self.__offset[0] -= e.y * self.__style.scroll_speed
+                self.__offset[0] -= e.x * self.__style.scroll_speed
 
     def __clamp_offset(self):
         view = to_array(self.__style.size)
@@ -98,10 +85,7 @@ class ScrollView:
         max_offset = np.maximum(content - view, 0)
         self.__offset = np.clip(self.__offset, 0, max_offset)
 
-    def __build_scrollbar(self):
-        if not self.__style.show_scrollbar:
-            return
-
+    def __build_scrollbar(self) -> None:
         view = to_array(self.__style.size)
         content = to_array(self.__style.content_size)
 
@@ -134,11 +118,8 @@ class ScrollView:
 
         self.__hovered = self.__scrollbar_rect.collidepoint(mouse)
 
-        if pressed and self.__hovered:
-            self.__dragging = True
-
-        if not pressed:
-            self.__dragging = False
+        if pressed and self.__hovered: self.__dragging = True
+        if not pressed: self.__dragging = False
 
         if self.__dragging:
             view = to_array(self.__style.size)
@@ -152,11 +133,7 @@ class ScrollView:
                 self.__offset[0] = (rel / view[0]) * content[0]
 
     def __draw_bg(self):
-        pygame.draw.rect(
-            self.__surface,
-            hex_to_rbg(self.__style.bg_color),
-            self.__viewport_rect
-        )
+        pygame.draw.rect(self.__surface, hex_to_rbg(self.__style.bg_color), self.__viewport_rect, border_radius=self.__style.border_radius)
 
     def __draw_content(self):
         old_clip = self.__surface.get_clip()
@@ -168,37 +145,27 @@ class ScrollView:
         self.__surface.set_clip(old_clip)
 
     def __draw_scrollbar(self):
-        if not self.__style.show_scrollbar:
-            return
+        if not self.__style.show_scrollbar: return
 
-        color = self.__style.scrollbar_color
+        visual_state = self.__get_visual_state_scrollbar()
+        color = self.__get_color_scrollbar_state(visual_state)
 
-        if self.__dragging:
-            color = self.__style.scrollbar_color_active
-        elif self.__hovered:
-            color = self.__style.scrollbar_color_hover
+        pygame.draw.rect(self.__surface, color, self.__scrollbar_rect, border_radius=self.__style.scrollbar_border_radius)
+    
+    def __get_visual_state_scrollbar(self) -> StateScrollbar:
+        if self.__hovered: return StateScrollbar.HOVER
+        elif self.__dragging: return StateScrollbar.ACTIVE
+        elif self.__pressed: return StateScrollbar.PRESSED
+        return StateScrollbar.NORMAL
+    
+    def __get_color_scrollbar_state(self, state: StateScrollbar) -> ColorType:
+        if state == StateScrollbar.HOVER: color = self.__style.scrollbar_color_hover
+        elif state == StateScrollbar.PRESSED: color = self.__style.scrollbar_color_pressed
+        elif state == StateScrollbar.ACTIVE: color = self.__style.scrollbar_color_active
+        else: color = self.__style.scrollbar_color
 
-        pygame.draw.rect(
-            self.__surface,
-            hex_to_rbg(color),
-            self.__scrollbar_rect,
-            border_radius=5
-        )
+        return hex_to_rbg(color)
 
-    # ================= PUBLIC =================
-    def update(self):
-        if not self.__style.visible:
-            return
-
-        self.__build_rect()
-        self.__handle_wheel()
-        self.__handle_drag()
-        self.__clamp_offset()
-        self.__build_scrollbar()
-
-        self.__draw_bg()
-        self.__draw_content()
-        self.__draw_scrollbar()
 
 
 # ==========================================================
@@ -262,14 +229,15 @@ def main():
     style = StyleScrollView(
         pos=(250, 100),
         size=(300, 350),
-        content_size=(300, 1500)
+        content_size=(300, 1500),
+        direction="vertical"
     )
 
     scroll = ScrollView(screen, style, render)
 
     running = True
     while running:
-        screen.fill((30, 30, 30))
+        screen.fill("#ffffff")
 
         for e in pygame.event.get():
             if e.type == pygame.QUIT:

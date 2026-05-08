@@ -1,16 +1,22 @@
 """
 Image Module
 ============
-This module provides a styled image display component built on top of pygame.
-It supports multiple scaling modes, optional border radius clipping,
-background fill, and border rendering.
+This module provides a styled image display component
+built on top of pygame.
+
+The component supports multiple scaling modes,
+optional rounded corner clipping,
+background fill,
+and border rendering.
 
 It includes:
-- `StyleImage` : Dataclass holding all style/configuration options for an image.
-- `Image`      : Loads, scales, and renders an image inside a styled rectangular frame.
+- `StyleImage` : Dataclass holding all visual
+                 and scaling configuration for an image.
+- `Image`      : Loads, scales, and renders an image
+                 inside a styled rectangular frame.
 
 Typical usage:
-    style = StyleImage(
+>>> style = StyleImage(
         path="assets/avatar.png",
         size=(100, 100),
         pos=(50, 50),
@@ -18,11 +24,10 @@ Typical usage:
         border_radius=12,
         border=2,
         border_color="#aaaaaa"
-    )
-    image = Image(surface, style)
-
-    # Inside game loop
-    image.update()
+     )
+     image = Image(surface, style)
+     # Inside game loop
+     image.update()
 """
 
 import pygame
@@ -38,40 +43,81 @@ from packages.utils.utils_transform import hex_to_rbg, to_array
 class StyleImage:
 
     """
-    Dataclass containing all visual and scaling configuration for an Image.
+    Dataclass containing all visual
+    and scaling configuration for an Image.
 
     Scaling modes
     -------------
-    - ``fit``     : Scales the image to fit within the target size while
-                    preserving aspect ratio. May leave empty space on sides.
-    - ``fill``    : Scales the image to fill the target size while
-                    preserving aspect ratio. May crop the image.
-    - ``stretch`` : Scales the image to exactly match the target size.
-                    Does not preserve aspect ratio.
-    - ``custom``  : Uses the ``scale`` field as a manual ratio multiplier.
+    The image supports four scaling modes:
+
+    - ``fit`` :
+        Scales the image to fit inside the target size while preserving aspect ratio.
+        Empty space may remain on one axis.
+
+    - ``fill`` :
+        Scales the image to fully cover the target size while preserving aspect ratio.
+        Parts of the image may be cropped.
+
+    - ``stretch`` : 
+        Scales the image to exactly match the target size. Aspect ratio is not preserved.
+
+    - ``custom`` :
+        Uses ``scale`` as a manual scaling multiplier.
+
+    Rendering
+    ---------
+    The image can optionally render:
+
+    - Background fill
+    - Border
+    - Rounded corner clipping
+
+    Rounded corners are applied to the rendered image, background, and border.
 
     Attributes
     ----------
-    path : str, optional
-        File path to the image to load. Defaults to None.
-    bg_color : ColorType
-        Background color shown behind the image. Defaults to #f0f0f0.
-    border : int
-        Border thickness in pixels. 0 means no border.
-    border_color : ColorType
-        Color of the border. Defaults to #000000.
-    border_radius : int
-        Corner radius for rounded clipping applied to the image,
-        background, and border. Defaults to 0.
-    size : Vec2
-        Size (width, height) of the image frame. Defaults to (100, 100).
-    pos : Vec2
-        Position (x, y) of the image frame on the surface. Defaults to (0, 0).
-    scale : Number
-        Manual scale ratio used when ``mode`` is ``custom``. Defaults to 1.
-    mode : Literal["fit", "fill", "stretch", "custom"]
-        Scaling mode applied to the image. Defaults to ``custom``.
-    visible : bool
+    >>> path : str, optional
+
+        File path of the image to load.
+
+    >>> bg_color : ColorType
+
+        Background color rendered behind the image.
+
+    >>> border : int
+
+        Border thickness in pixels. ``0`` disables border rendering.
+
+    >>> border_color : ColorType
+
+        Color of the border.
+
+    >>> border_radius : int
+
+        Corner radius used for:
+
+            - image clipping
+            - background rendering
+            - border rendering
+
+    >>> size : Vec2
+
+        Size (width, height) of the image frame.
+
+    >>> pos : Vec2
+
+        Position (x, y) of the image frame on the surface.
+
+    >>> scale : Number
+
+        Manual scale multiplier used when ``mode`` is ``custom``.
+
+    >>> mode : Literal["fit", "fill", "stretch", "custom"]
+
+        Scaling mode applied to the image.
+
+    >>> visible : bool
+
         Whether the image is rendered. Defaults to True.
     """
 
@@ -96,41 +142,73 @@ class StyleImage:
 class Image:
 
     """
-    A styled image component that loads, scales, and renders an image
-    inside a rectangular frame with optional background, border, and rounded corners.
+    A styled image component that loads, scales, and renders an image inside a rectangular frame.
 
-    The image is loaded, scaled, and border-radius clipped once at initialization.
-    On each ``update()`` call, the border, background, and image are drawn in order.
+    The component supports:
 
-    Scaling
-    -------
-    Scaling is handled at init time via ``__scale_image()``, which applies
-    one of four modes: fit, fill, stretch, or custom ratio.
-    The resulting image is then passed through ``__apply_border_radius()``
-    to clip rounded corners using an RGBA mask.
+        - Multiple scaling modes
+        - Optional background rendering
+        - Optional border rendering
+        - Rounded corner clipping
+
+    Initialization
+    --------------
+    The image is loaded and processed once
+    during initialization.
+
+    Processing steps:
+
+    1. Load image from disk
+
+    2. Apply scaling mode
+
+    3. Apply rounded corner clipping
+    (if enabled)
 
     Rendering order (back to front)
     --------------------------------
-    1. Border      (slightly larger rect behind the frame)
-    2. Background  (filled rect at frame position)
-    3. Image       (scaled and clipped, centered within the frame)
+    1. Border
+    (slightly larger rect behind the frame)
+
+    2. Background
+    (filled rect at frame position)
+
+    3. Image
+    (scaled and clipped image
+    centered inside the frame)
+
+    Scaling behavior
+    ----------------
+    Scaling is handled internally by ``__scale_image()``.
+
+    Depending on the selected mode, the component calculates an appropriate scale ratio or target size.
+
+    Rounded clipping
+    ----------------
+    Rounded corners are applied using an RGBA mask surface.
+
+    The clipping affects only the rendered image surface.
 
     Attributes
     ----------
-    surface : pygame.Surface
+    >>> surface : pygame.Surface
+
         The surface on which the image is drawn.
-    style : StyleImage
+
+    >>> style : StyleImage
+
         The style/configuration object for this image.
 
     Methods
     -------
-    update() -> None
+    >>> update() -> None
+
         Draws the border, background, and image each frame.
         Does nothing if ``StyleImage.visible`` is False.
 
     Example
     -------
-        style = StyleImage(
+>>> style = StyleImage(
             path="assets/logo.png",
             size=(200, 200),
             pos=(100, 100),
@@ -139,11 +217,9 @@ class Image:
             border=2,
             border_color="#cccccc"
         )
-        
-        img = Image(surface, style)
-
+        image = Image(surface, style)
         # Inside game loop
-        img.update()
+        image.update()
     """
 
     def __init__(self,
