@@ -1,10 +1,9 @@
-import pygame
+import pygame, numpy
 
 pygame.init()
 
 from packages.components.scences import *
 from packages.systems.config import load_config_screen, intro_doc
-from packages.systems import *
 
 def TestsSystems():
     config_screen = load_config_screen()

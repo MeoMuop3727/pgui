@@ -1,3 +1,5 @@
+"""Logging module for configuring console and file-based application logging."""
+
 from .config import load_config_logger
 
 import sys

@@ -1,3 +1,5 @@
+"""Utility module for loading and managing application configuration files."""
+
 import json
 
 # Return the config of screen
