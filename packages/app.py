@@ -3,12 +3,13 @@ import pygame
 pygame.init()
 
 from .components.scences import *
-from .systems.config import load_config_screen
+from .systems.config import load_config_screen, intro_doc
 from .components.ui import *
-
 
 def App():
     config_screen = load_config_screen()
+
+    intro_doc(__name__)
 
     SIZE_SCREEN = (config_screen["window"]["width"], config_screen["window"]["height"])
 

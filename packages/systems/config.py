@@ -1,7 +1,3 @@
-"""
-
-"""
-
 import json
 
 # Return the config of screen
@@ -26,3 +22,6 @@ def set_config_screen(key: str, new_value: any) -> None:
 def set_config_logger(key: str, new_value: any) -> None:
     pass
 
+def intro_doc(name) -> None:
+    config_screen = load_config_screen()
+    print(config_screen["window"]["intro-doc"] + f". {name}")
