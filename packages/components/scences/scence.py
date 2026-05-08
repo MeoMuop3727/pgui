@@ -14,19 +14,16 @@ It includes:
 - `Scene` : Base class defining the interface for all game scenes.
 
 Typical usage:
-    class GameScene(Scene):
+>>> class GameScene(Scene):
         def on_enter(self):
             self.player = Player()
-
         def handle_event(self, events):
             for event in events:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.manager.pop_scene()
-
         def update(self, delta):
             self.player.update(delta)
-
         def render(self, screen):
             screen.fill((0, 0, 0))
             self.player.render(screen)
@@ -47,39 +44,47 @@ class Scence:
 
     Attributes
     ----------
-    manager : ManageScene or None
+>>> manager : ManageScene or None
+
         Reference to the scene manager. Assigned automatically
         when the scene is pushed onto the stack.
 
     Methods
     -------
-    on_enter() -> None
+>>> on_enter() -> None
+
         Called once when the scene is pushed onto the stack.
         Use for initialization or reset logic.
-    on_exit() -> None
+
+>>> on_exit() -> None
+    
         Called once when the scene is popped off the stack.
         Use for cleanup logic.
-    handle_event(events) -> None
+    
+>>> handle_event(events) -> None
+    
         Called each frame with the list of pygame events.
         Use to handle input and user interactions.
-    update(delta) -> None
+    
+>>> update(delta) -> None
+    
         Called each frame with the delta time in seconds.
         Use to update game logic and state.
-    render(screen) -> None
+    
+>>> render(screen) -> None
+    
         Called each frame with the main display surface.
         Use to draw the scene content.
 
     Example
     -------
-        class MainMenuScene(Scene):
+>>> class MainMenuScene(Scene):
             def on_enter(self):
                 print("Entering main menu")
-
             def handle_event(self, events):
                 for event in events:
                     if event.type == pygame.KEYDOWN:
                         self.manager.push_scene(GameScene())
-
             def render(self, screen):
                 screen.fill((0, 0, 0))
     """

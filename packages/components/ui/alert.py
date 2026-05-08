@@ -35,12 +35,8 @@ from typing import Optional, Literal, Dict
 
 from packages.utils.utils_typing import Vec2, ColorType
 from packages.utils.utils_transform import to_array, hex_to_rbg
-from packages.components.ui import (
-    ButtonText,
-    StyleButton,
-    TextBox,
-    StyleTextBox,
-)
+from .button import ButtonText, StyleButton
+from .textbox import TextBox, StyleTextBox
 
 @dataclass(slots=True)
 class StyleAlert:

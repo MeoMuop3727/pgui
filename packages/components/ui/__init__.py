@@ -1,3 +1,10 @@
+"""
+PGUI is a set of Python UI components designed for building game interfaces with pygame.
+It is built on top of pygame and numpy, providing ready-to-use widgets such as buttons,
+inputs, sliders, dropdowns, and more. Each component follows a consistent Style/Component
+pattern, making it straightforward to customize and integrate into any pygame project.
+"""
+
 from .alert import Alert, StyleAlert
 from .button import Button, ButtonImage, ButtonText, StyleButton
 from .checkbox import CheckBox, CheckBoxList, StyleCheckBox

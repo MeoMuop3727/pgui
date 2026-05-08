@@ -11,12 +11,12 @@ It includes:
 - `ManageScene` : Manages the scene stack and drives the main game loop.
 
 Typical usage:
-    screen = pygame.display.set_mode((800, 600))
+>>> screen = pygame.display.set_mode((800, 600))
 
-    manager = ManageScene(screen)
-    manager.push_scene(MainMenuScene())
+>>> manager = ManageScene(screen)
+>>> manager.push_scene(MainMenuScene())
 
-    manager.run(fps=60)
+>>> manager.run(fps=60)
 """
 
 import pygame, sys
@@ -34,12 +34,13 @@ class ManageScence:
 
     Attributes
     ----------
-    screen : pygame.Surface
+>>> screen : pygame.Surface
+
         The main display surface passed to the active scene each frame.
 
     Example
     -------
-        manager = ManageScene(screen)
+>>> manager = ManageScene(screen)
         manager.push_scene(MainMenuScene())
         manager.run(fps=60)
     """
