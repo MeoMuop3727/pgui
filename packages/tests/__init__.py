@@ -1,3 +1,4 @@
 from .tests_components_ui import TestsComponentsUI
 from .tests_systems import TestsSystems
 from .tests_components_scence import TestsComponentsScence
+from .tests_entities import TestsEntity

@@ -1,6 +1,6 @@
 from .app import App
 
-from packages.tests import TestsComponentsUI, TestsSystems, TestsComponentsScence
+from packages.tests import *
 
 # python3 -m packages.main
 
