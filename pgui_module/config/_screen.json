@@ -15,7 +15,7 @@
         "caption": "Pygame - PGUI - Debug",
         "fps": 60,
         "font-family": null,
-        "icon": "packages/assets/icon.png"
+        "icon": "pgui_module/assets/icon.png"
     },
     "render": {
         "background-color": "#FFFFFF"

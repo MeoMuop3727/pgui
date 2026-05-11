@@ -8,8 +8,11 @@ class config:
     def __init__(self, path: str = PATH_CONFIG_SCREEN):
         self.__path = path
 
-        with open(self.__path, "r") as file:
-            self.__data: dict = json.load(file)
+        try:
+            with open(self.__path, "r") as file:
+                self.__data: dict = json.load(file)
+        except FileNotFoundError:
+            self.__data = []
     
     def load(self) -> dict:
         return self.__data
@@ -21,7 +24,7 @@ class config:
         return self.__data.pop(key)
 
     def intro_doc(self, name):
-        print(f"{self.__data["intro-doc"]}. {name}")
+        print(f"{self.__data["window"]["intro-doc"]}. {name}")
     
     def update(self):
         with open(self.__path, "w") as file:
