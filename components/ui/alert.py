@@ -33,8 +33,8 @@ import pygame
 from dataclasses import dataclass
 from typing import Optional, Literal, Dict
 
-from pgui_module.utils.utils_typing import Vec2, ColorType
-from pgui_module.utils.utils_transform import to_array, hex_to_rbg
+from utils.utils_typing import Vec2, ColorType
+from utils.utils_transform import to_array, hex_to_rbg
 from .button import ButtonText, StyleButton
 from .textbox import TextBox, StyleTextBox
 

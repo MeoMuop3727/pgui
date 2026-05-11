@@ -28,8 +28,8 @@ Typical usage:
 
 import pygame
 
-from pgui_module.utils.utils_typing import Vec2, ColorType
-from pgui_module.utils.utils_transform import hex_to_rbg, to_array
+from utils.utils_typing import Vec2, ColorType
+from utils.utils_transform import hex_to_rbg, to_array
 
 from dataclasses import dataclass
 

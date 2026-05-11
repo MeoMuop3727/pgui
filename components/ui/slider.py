@@ -36,8 +36,8 @@ from dataclasses import dataclass
 from typing import Literal, List
 from enum import Enum
 
-from pgui_module.utils.utils_typing import Vec2, ColorType, Number
-from pgui_module.utils.utils_transform import to_array, hex_to_rbg
+from utils.utils_typing import Vec2, ColorType, Number
+from utils.utils_transform import to_array, hex_to_rbg
 
 class StateSlider(Enum):
 
