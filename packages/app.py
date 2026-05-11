@@ -3,20 +3,21 @@ import pygame
 pygame.init()
 
 from pgui_module.components.scences import *
-from pgui_module.systems.config import load_config_screen, intro_doc
+from pgui_module.systems.config import config
 from pgui_module.components.ui import *
 
 def App():
-    config_screen = load_config_screen()
+    config_screen = config()
+    data = config_screen.load()
 
-    intro_doc(__name__)
+    config_screen.intro_doc(__name__)
 
-    SIZE_SCREEN = (config_screen["window"]["width"], config_screen["window"]["height"])
+    SIZE_SCREEN = (data["window"]["width"], data["window"]["height"])
 
     screen = pygame.display.set_mode(SIZE_SCREEN)
-    pygame.display.set_caption(config_screen["display"]["caption"])
+    pygame.display.set_caption(data["display"]["caption"])
 
-    icon_game = pygame.image.load(config_screen["display"]["icon"])
+    icon_game = pygame.image.load(data["display"]["icon"])
     pygame.display.set_icon(icon_game)
 
     manager = ManageScence(screen)
@@ -26,7 +27,7 @@ def App():
             super().__init__()
 
             self.__font = pygame.font.Font(None, 50)
-            self.__content = config_screen["display"]["caption"]
+            self.__content = data["display"]["caption"]
             self.__visible_text = False
             self.__time = 0.0
             self.__time_interval = 0.5
@@ -47,7 +48,7 @@ def App():
             self.__logo = Image(
                 surface,
                 StyleImage(
-                    path=config_screen["display"]["icon"],
+                    path=data["display"]["icon"],
                     pos=(
                         (surface.get_size()[0] - self.__font.size(self.__content)[0]) // 2 + 50,
                         surface.get_size()[1] // 2 - 200

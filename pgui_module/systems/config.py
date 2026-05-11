@@ -1,29 +1,28 @@
 """Utility module for loading and managing application configuration files."""
 
+PATH_CONFIG_SCREEN = "pgui_module/config/_screen.json"
+
 import json
 
-# Return the config of screen
-def load_config_screen() -> dict:
-    with open("pgui_module/config/_screen.json") as file:
-        config_screen = json.load(file)
-        
-    return config_screen
+class config:
+    def __init__(self, path: str = PATH_CONFIG_SCREEN):
+        self.__path = path
 
-# Return the config of logger
-def load_config_logger() -> dict:
-    with open("pgui_module/config/_log.json") as file:
-        config_logger = json.load(file)
+        with open(self.__path, "r") as file:
+            self.__data: dict = json.load(file)
     
-    return config_logger
+    def load(self) -> dict:
+        return self.__data
+    
+    def set(self, key: str, value: any):
+        self.__data[key] = value
+    
+    def pop(self, key: str) -> any:
+        return self.__data.pop(key)
 
-# Set the config of screen
-def set_config_screen(key: str, new_value: any) -> None:
-    pass
-
-# Set the config of logger
-def set_config_logger(key: str, new_value: any) -> None:
-    pass
-
-def intro_doc(name) -> None:
-    config_screen = load_config_screen()
-    print(config_screen["window"]["intro-doc"] + f". {name}")
+    def intro_doc(self, name):
+        print(f"{self.__data["intro-doc"]}. {name}")
+    
+    def update(self):
+        with open(self.__path, "w") as file:
+            json.dump(self.__data, file, indent="\t", ensure_ascii=False)
