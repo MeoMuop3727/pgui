@@ -46,9 +46,9 @@ import pygame, numpy
 import pygame.surfarray as surfarray
 
 from numpy.typing import NDArray
-from packages.utils.utils_typing import Vec2
+from pgui_module.utils.utils_typing import Vec2
 
-from packages.utils.utils_transform import to_array
+from pgui_module.utils.utils_transform import to_array
 
 class DrawSystem:
 

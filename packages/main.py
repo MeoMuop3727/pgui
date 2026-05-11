@@ -1,10 +1,10 @@
 from .app import App
 
-from .tests import TestsComponentsUI, TestsSystems, TestsComponentsScence
+from pgui_module.tests import TestsComponentsUI, TestsSystems, TestsComponentsScence
 
 # python3 -m packages.main
 
-# App() 
+App() 
 # TestsComponentsUI()
 # TestsSystems()
 # TestsComponentsScence()

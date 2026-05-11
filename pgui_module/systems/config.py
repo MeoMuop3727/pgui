@@ -4,14 +4,14 @@ import json
 
 # Return the config of screen
 def load_config_screen() -> dict:
-    with open("packages/config/_screen.json") as file:
+    with open("pgui_module/config/_screen.json") as file:
         config_screen = json.load(file)
         
     return config_screen
 
 # Return the config of logger
 def load_config_logger() -> dict:
-    with open("packages/config/_log.json") as file:
+    with open("pgui_module/config/_log.json") as file:
         config_logger = json.load(file)
     
     return config_logger

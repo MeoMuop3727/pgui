@@ -2,9 +2,9 @@ import pygame
 
 pygame.init()
 
-from .components.scences import *
-from .systems.config import load_config_screen, intro_doc
-from .components.ui import *
+from pgui_module.components.scences import *
+from pgui_module.systems.config import load_config_screen, intro_doc
+from pgui_module.components.ui import *
 
 def App():
     config_screen = load_config_screen()

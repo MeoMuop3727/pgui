@@ -35,9 +35,9 @@ import pygame
 from dataclasses import dataclass
 
 from typing import Optional, Literal, Tuple
-from packages.utils.utils_typing import Vec2, ColorType, Number
+from pgui_module.utils.utils_typing import Vec2, ColorType, Number
 
-from packages.utils.utils_transform import hex_to_rbg, to_array
+from pgui_module.utils.utils_transform import hex_to_rbg, to_array
 
 @dataclass(slots=True)
 class StyleImage:

@@ -1,12 +1,11 @@
-import pygame
+import pygame, numpy
 
 pygame.init()
 
-from packages.components.scences import *
-from packages.systems.config import load_config_screen, intro_doc
-from packages.components.ui import *
+from pgui_module.components.scences import *
+from pgui_module.systems.config import load_config_screen, intro_doc
 
-def TestsComponentsUI():
+def TestsSystems():
     config_screen = load_config_screen()
 
     intro_doc(__name__)    
@@ -25,7 +24,7 @@ def TestsComponentsUI():
         def __init__(self, surface: pygame.Surface):
             super().__init__()
 
-            # Create your UI in here
+            # Create your SYSTEM in here
 
         def render(self, screen):
             screen.fill("#000000")

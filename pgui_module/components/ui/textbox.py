@@ -25,9 +25,9 @@ import pygame
 
 from dataclasses import dataclass
 from typing import List
-from packages.utils.utils_typing import Vec2, ColorType
+from pgui_module.utils.utils_typing import Vec2, ColorType
 
-from packages.utils.utils_transform import to_array, hex_to_rbg
+from pgui_module.utils.utils_transform import to_array, hex_to_rbg
 
 @dataclass(slots=True)
 class StyleTextBox:

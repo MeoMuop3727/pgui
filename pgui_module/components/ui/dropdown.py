@@ -36,8 +36,8 @@ from dataclasses import dataclass, field
 from typing import Optional, List
 from enum import Enum
 
-from packages.utils.utils_typing import Vec2, ColorType
-from packages.utils.utils_transform import to_array, hex_to_rbg
+from pgui_module.utils.utils_typing import Vec2, ColorType
+from pgui_module.utils.utils_transform import to_array, hex_to_rbg
 
 from .button import StyleButton, ButtonText
 

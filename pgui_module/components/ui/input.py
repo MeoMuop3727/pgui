@@ -31,10 +31,10 @@ Typical usage:
 import pygame
 
 from dataclasses import dataclass
-from packages.utils.utils_typing import Vec2, ColorType
+from pgui_module.utils.utils_typing import Vec2, ColorType
 from typing import Optional
 
-from packages.utils.utils_transform import to_array, hex_to_rbg
+from pgui_module.utils.utils_transform import to_array, hex_to_rbg
 from enum import Enum
 
 class InputStates(Enum):

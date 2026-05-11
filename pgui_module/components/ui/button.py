@@ -25,10 +25,10 @@ import pygame
 
 from dataclasses import dataclass
 from typing import Optional, Callable
-from packages.utils.utils_typing import ColorType, Vec2
+from pgui_module.utils.utils_typing import ColorType, Vec2
 from enum import Enum
 
-from packages.utils.utils_transform import hex_to_rbg, to_array
+from pgui_module.utils.utils_transform import hex_to_rbg, to_array
 
 class StateButton(Enum):
 

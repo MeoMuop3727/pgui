@@ -31,9 +31,9 @@ import numpy as np
 from dataclasses import dataclass, field
 from typing import Callable, Optional, Literal
 from enum import Enum
-from packages.utils.utils_typing import Vec2, ColorType
+from pgui_module.utils.utils_typing import Vec2, ColorType
 
-from packages.utils.utils_transform import hex_to_rbg, to_array
+from pgui_module.utils.utils_transform import hex_to_rbg, to_array
 
 class StateScrollbar(Enum):
 
