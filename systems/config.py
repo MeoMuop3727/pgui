@@ -1,6 +1,6 @@
 """Utility module for loading and managing application configuration files."""
 
-PATH_CONFIG_SCREEN = "pgui_module/config/_screen.json"
+PATH_CONFIG_SCREEN = "config/_screen.json"
 
 import json
 
@@ -12,7 +12,7 @@ class config:
             with open(self.__path, "r") as file:
                 self.__data: dict = json.load(file)
         except FileNotFoundError:
-            self.__data = []
+            self.__data: dict = []
     
     def load(self) -> dict:
         return self.__data
