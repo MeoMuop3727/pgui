@@ -35,8 +35,8 @@ from typing import Optional, Literal, Dict
 
 from utils.utils_typing import Vec2, ColorType
 from utils.utils_transform import to_array, hex_to_rbg
-from .button import ButtonText, StyleButton
-from .textbox import TextBox, StyleTextBox
+from components.ui.button import ButtonText, StyleButton
+from components.ui.textbox import TextBox, StyleTextBox
 
 @dataclass(slots=True)
 class StyleAlert:
@@ -277,10 +277,13 @@ class Alert:
 
         self.__type_color = {
             "error": "#e74c3c",
-            "wanring": "#f39c12",
+            "warning": "#f39c12",
             "success": "#27ae60",
             "info": "#3498db"
         }
+
+        self.__content = self.__style.content
+        self.__title = self.__style.title
 
         self.__visible = self.__style.visible
 
@@ -334,13 +337,29 @@ class Alert:
         return self.__visible
     
     @visible.setter
-    def visible(self, new_visible: bool) -> None:
+    def visible(self, new_visible: bool):
         self.__visible = new_visible
+    
+    @property
+    def title(self) -> str:
+        return self.__title
+    
+    @title.setter
+    def title(self, new_title):
+        self.__title = new_title
+    
+    @property
+    def content(self) -> str:
+        return self.__content
+
+    @content.setter
+    def content(self, new_content):
+        self.__content = new_content
 
     def get_color_type(self) -> Dict[str, str]:
         return self.__type_color
     
-    def __draw_title(self) -> None:
+    def __draw_title(self):
         title_frame = pygame.Rect(self.__style.pos, self.__size_title_frame)
 
         title_surface = self.__style.font.render(self.__style.title, self.__style.antialias, self.__style.title_color)
@@ -352,7 +371,7 @@ class Alert:
         
         self.__surface.blit(title_surface, title_rect)
     
-    def __draw_border(self) -> None:
+    def __draw_border(self):
         border_width: Vec2 = (self.__style.border, self.__style.border)
 
         size_border: Vec2 = to_array(self.__style.size) + to_array(border_width) * 2
@@ -365,5 +384,5 @@ class Alert:
 
         pygame.draw.rect(self.__surface, hex_to_rbg(self.__style.border_color), border)
     
-    def __close_alert(self) -> None:
+    def __close_alert(self):
         self.visible = False

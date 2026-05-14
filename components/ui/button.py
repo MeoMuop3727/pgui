@@ -314,7 +314,7 @@ class Button:
         - pressed state
         - disable state
 
-    >>> update() -> None
+    >>> update()
 
         Base no-op update method.
 
@@ -350,13 +350,23 @@ class Button:
         self.rect = pygame.Rect(self.pos, self.size)
 
         self.state = self.style.state
+
+        self.visible = self.style.visible
+    
+    @property
+    def visible_button(self) -> bool:
+        return self.visible
+
+    @visible_button.setter
+    def visible_button(self, new_visible: bool):
+        self.visible = new_visible
     
     @property
     def pos_button(self) -> Vec2:
         return self.pos
     
     @pos_button.setter
-    def pos_button(self, new_pos: Vec2) -> None:
+    def pos_button(self, new_pos: Vec2):
         self.pos = new_pos
         self.rect(new_pos, self.size)
     
@@ -365,7 +375,7 @@ class Button:
         return self.size
     
     @size_button.setter
-    def size_button(self, new_size: Vec2) -> None:
+    def size_button(self, new_size: Vec2):
         self.size = new_size
         self.rect(self.pos, new_size)
     
@@ -374,7 +384,7 @@ class Button:
         return self.rect
     
     @rect_button.setter
-    def rect_button(self, new_pos: Vec2, new_size: Vec2) -> None:
+    def rect_button(self, new_pos: Vec2, new_size: Vec2):
         self.rect = pygame.Rect(new_pos, new_size)
     
     def get_visual_state(self) -> StateButton:
@@ -383,7 +393,7 @@ class Button:
         elif self.is_pressed: return StateButton.PRESSED
         return StateButton.NORMAL
     
-    def update(self) -> None: pass
+    def update(self): pass
 
 class ButtonText(Button):
 
@@ -446,7 +456,7 @@ class ButtonText(Button):
              style: StyleButton):
         super().__init__(surface, style)
     
-    def update(self) -> None:
+    def update(self):
         if self.style.visible:
             mouse_pos = pygame.mouse.get_pos()
             self.is_hover = self.rect.collidepoint(mouse_pos)
@@ -507,16 +517,16 @@ class ButtonText(Button):
         return hex_to_rbg(color)
     
     # Rendering
-    def __draw_bg_button(self, color: ColorType) -> None:
+    def __draw_bg_button(self, color: ColorType):
         button = self.rect
         pygame.draw.rect(self.surface, color, button, border_radius=self.style.border_radius)
 
-    def __draw_text_button(self, color: ColorType) -> None:
+    def __draw_text_button(self, color: ColorType):
         text_surface = self.style.font.render(self.style.content, self.style.antialias, color)
         text_rect = text_surface.get_rect(center=self.rect.center)
         self.surface.blit(text_surface, text_rect)
 
-    def __draw_border_button(self, color: ColorType) -> None:
+    def __draw_border_button(self, color: ColorType):
         border_width: Vec2 = (self.style.border, self.style.border)
         size_border = to_array(self.style.size) + to_array(border_width) * 2
         pos_border = to_array(self.style.pos) - to_array(border_width)
@@ -555,7 +565,7 @@ class ButtonImage(Button):
     Methods
     -------
 
-    >>> update() -> None
+    >>> update()
 
         Updates interaction state and renders image.
 
@@ -585,7 +595,7 @@ class ButtonImage(Button):
                  style: StyleButton):
         super().__init__(surface, style)
 
-    def update(self) -> None:
+    def update(self):
         if self.style.visible:
             mouse_pos = pygame.mouse.get_pos()
             self.is_hover = self.rect.collidepoint(mouse_pos)
@@ -608,13 +618,14 @@ class ButtonImage(Button):
 
             if image is None: return
 
+            color_border = self.__get_color_border_state(visual_state)
+            self.__draw_border_button(color_border)
+
             image_rect = image.get_rect(center=(self.rect.center))
 
             self.surface.blit(image, image_rect)
 
     def __get_image_button_state(self, state: StateButton) -> pygame.Surface:
-        image = None
-
         if state == StateButton.NORMAL: image = self.__load_image(self.style.image)
         elif state == StateButton.PRESSED: image = self.__load_image(self.style.image_pressed)
         elif state == StateButton.HOVER: image = self.__load_image(self.style.image_hover)
@@ -623,9 +634,31 @@ class ButtonImage(Button):
         return image
     
     def __load_image(self, path: Optional[str]) -> Optional[pygame.Surface]:
-        if path is None: return None
+        if path is None or path == '': return None
 
         image = pygame.image.load(path)
         image = pygame.transform.scale(image, self.size)
 
         return image
+    
+    def __get_color_border_state(self, state: StateButton) -> ColorType:
+        color = None
+        
+        if state == StateButton.NORMAL: color = self.style.border_color
+        elif state == StateButton.PRESSED: color = self.style.border_color_pressed
+        elif state == StateButton.HOVER: color = self.style.border_color_hover
+        else: color = self.style.border_color_disable
+
+        return hex_to_rbg(color)
+    
+    def __draw_border_button(self, color: ColorType):
+        border_width: Vec2 = (self.style.border, self.style.border)
+        size_border = to_array(self.style.size) + to_array(border_width) * 2
+        pos_border = to_array(self.style.pos) - to_array(border_width)
+
+        border = pygame.Rect(
+            (int(pos_border[0]), int(pos_border[1])),
+            (int(size_border[0]), int(size_border[1]))
+        )
+
+        pygame.draw.rect(self.surface, color, border, border_radius=self.style.border_radius)

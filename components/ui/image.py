@@ -228,23 +228,36 @@ class Image:
         self.__surface = surface
         self.__style = style
 
-        self.__image = pygame.image.load(self.__style.path).convert_alpha()
+        self.__path_image = self.__style.path
+
+        self.__image = pygame.image.load(self.__path_image).convert_alpha()
         self.__scale_image()
         self.__image = self.__apply_border_radius()
 
         self.__rect = pygame.Rect(self.__style.pos, self.__style.size)
     
-    def update(self) -> None:
+    def get_rect(self) -> pygame.Rect:
+        return self.__rect
+    
+    @property 
+    def path_image(self) -> str:
+        return self.__path_image
+    
+    @path_image.setter
+    def path_image(self, path: str):
+        self.__path_image = path
+
+    def update(self):
         if self.__style.visible:
             self.__draw_border()
             self.__draw_bg()
             self.__draw_image()
 
-    def __draw_bg(self) -> None:
+    def __draw_bg(self):
         bg = self.__rect
         pygame.draw.rect(self.__surface, hex_to_rbg(self.__style.bg_color), bg, border_radius=self.__style.border_radius)
     
-    def __draw_border(self) -> None:
+    def __draw_border(self):
         border_width: Vec2 = (self.__style.border, self.__style.border)
         size_border = to_array(self.__style.size) + to_array(border_width) * 2
         pos_border = to_array(self.__style.pos) - to_array(border_width)
@@ -256,11 +269,11 @@ class Image:
 
         pygame.draw.rect(self.__surface, hex_to_rbg(self.__style.border_color), border, border_radius=self.__style.border_radius)
     
-    def __draw_image(self) -> None:
+    def __draw_image(self):
         image_rect = self.__image.get_rect(center=self.__rect.center)
         self.__surface.blit(self.__image, image_rect)
     
-    def __scale_image(self) -> None:
+    def __scale_image(self):
         image_size = self.__image.get_size()
 
         if self.__style.mode == "fill":

@@ -32,7 +32,7 @@ from typing import Callable, Optional, Literal, List
 from utils.utils_typing import Vec2, ColorType
 
 from utils.utils_transform import hex_to_rbg, to_array
-from .button import ButtonText, StyleButton
+from components.ui.button import ButtonText, StyleButton
 
 @dataclass(slots=True)
 class StyleTab:
