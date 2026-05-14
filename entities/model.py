@@ -1,6 +1,6 @@
 import pygame
 from typing import Optional
-from .animation import Animation
+from entities.animation import Animation
 
 class Model:
     """
