@@ -1,4 +1,4 @@
-from .utils_typing import ColorType, RGB_COLOR, Number
+from utils.utils_typing import ColorType, RGB_COLOR, Number
 from numpy.typing import NDArray
 from typing import Tuple
 
