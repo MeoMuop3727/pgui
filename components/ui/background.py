@@ -56,6 +56,7 @@ Notes
 
 import pygame
 from typing import Optional
+from utils.utils_transform import hex_to_rbg
 
 class BackgroundImage:
 
@@ -107,15 +108,13 @@ class BackgroundImage:
 
     def __init__(self, surface: pygame.Surface, path: Optional[str] = None):
         self.__surface = surface
-        self.__size_screen = self.__surface.size()
         self.__visible = True
         self.__error_load_img = False
 
         try:
             self.__background_img = pygame.image.load(path)
-            self.__background_img = pygame.transform.scale(self.__background_img, self.__size_screen)
         except FileNotFoundError:
-            self.__background_img = pygame.Rect((0, 0), self.__size_screen)
+            self.__background_img = pygame.Rect((0, 0), surface.get_size())
             self.__error_load_img = True
 
     @property
@@ -129,8 +128,10 @@ class BackgroundImage:
     def update(self):
         if self.__visible:
             if self.__error_load_img:
-                pygame.draw.rect(self.__surface, self.__background_img)
-            self.__surface.blit(self.__background_img, (0, 0))
+                pygame.draw.rect(self.__surface, hex_to_rbg("#000000"), self.__background_img)
+            else: 
+                self.__background_img = pygame.transform.scale(self.__background_img, self.__surface.get_size())
+                self.__surface.blit(self.__background_img, (0,0))
     
     
 

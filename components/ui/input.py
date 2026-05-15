@@ -201,8 +201,9 @@ class Input:
                  style: StyleInput):
         self.__surface = surface
         self.__style = style
+        self.__pos = style.pos 
 
-        self.__rect = pygame.Rect(self.__style.pos, self.__style.size)
+        self.__rect = pygame.Rect(self.__pos, self.__style.size)
 
         self.__text = self.__style.placeholder if self.__style.value == "" else self.__style.value
 
@@ -212,6 +213,14 @@ class Input:
         self.__cursor_pos = len(self.__text)
         self.__cursor_visible = False
         self.__cursor_timer = 0
+    
+    @property
+    def pos(self) -> Vec2:
+        return self.__pos
+
+    @pos.setter
+    def pos(self, new_pos: Vec2):
+        self.__pos = new_pos
 
     @property
     def content(self) -> str:
@@ -256,7 +265,7 @@ class Input:
         border_width: Vec2 = (self.__style.border, self.__style.border)
 
         size_border: Vec2 = to_array(self.__style.size) + to_array(border_width) * 2
-        pos: Vec2 = to_array(self.__style.pos) - to_array(border_width)
+        pos: Vec2 = to_array(self.__pos) - to_array(border_width)
 
         border = pygame.Rect(
             (int(pos[0]), int(pos[1])),
@@ -277,7 +286,7 @@ class Input:
         for index, line in enumerate(lines):
             text = line if not self.__style.password_mode else len(line) * "*"
             text_surface = self.__style.font.render(text, True, hex_to_rbg(self.__style.color))
-            text_rect = to_array(self.__style.pos) + to_array((self.__style.padding, self.__style.padding)) + to_array((0, (self.__style.font.get_height() + self.__style.line_height) * index))
+            text_rect = to_array(self.__pos) + to_array((self.__style.padding, self.__style.padding)) + to_array((0, (self.__style.font.get_height() + self.__style.line_height) * index))
 
             self.__surface.blit(text_surface, (int(text_rect[0]), int(text_rect[1])))
     
@@ -293,7 +302,7 @@ class Input:
         cursor_x = self.__style.font.size(cursor_col_text)[0]
         cursor_y = cursor_line * (self.__style.font.get_height() + self.__style.line_height)
 
-        pos_cursor = to_array(self.__style.pos) + to_array((self.__style.padding, self.__style.padding)) + to_array((cursor_x, cursor_y))
+        pos_cursor = to_array(self.__pos) + to_array((self.__style.padding, self.__style.padding)) + to_array((cursor_x, cursor_y))
 
         cursor = pygame.Rect(
             (int(pos_cursor[0]), int(pos_cursor[1])),

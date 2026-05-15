@@ -356,7 +356,6 @@ class Tab:
     def __init__(self,
                  surface: pygame.Surface,
                  style: StyleTab):
-        self.__style = style
         self.__visible = style.visible
 
         self.__tab_panel = TabPanel(surface, style)

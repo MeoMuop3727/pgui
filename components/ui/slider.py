@@ -235,6 +235,7 @@ class Slider:
         self.__surface = surface
         self.__style = style
         self.__visible = style.visible
+        self.__pos = style.pos 
 
         self.__is_hovered: bool = False
         self.__is_pressed: bool = False
@@ -244,6 +245,14 @@ class Slider:
         self.__track = self.__build_track_rect()
         self.__thumb = self.__build_thumb_rect()
         self.__fill = self.__build_fill_rect()
+    
+    @property
+    def pos(self) -> Vec2:
+        return self.__pos
+
+    @pos.setter
+    def pos(self, new_pos: Vec2):
+        self.__pos = new_pos
     
     @property
     def visible(self) -> bool:
@@ -313,7 +322,7 @@ class Slider:
         else:
             track_size = to_array((size[1], size[0]))
 
-        return pygame.Rect(self.__style.pos, (int(track_size[0]), int(track_size[1])))
+        return pygame.Rect(self.__pos, (int(track_size[0]), int(track_size[1])))
     
     def __build_thumb_rect(self) -> pygame.Rect:
         center = self.__calc_thumb_pos()

@@ -275,6 +275,8 @@ class Alert:
         self.__surface = surface
         self.__style = style
 
+        self.__pos = style.pos 
+
         self.__type_color = {
             "error": "#e74c3c",
             "warning": "#f39c12",
@@ -287,7 +289,7 @@ class Alert:
 
         self.__visible = self.__style.visible
 
-        self.__rect = pygame.Rect(self.__style.pos, self.__style.size)
+        self.__rect = pygame.Rect(self.__pos, self.__style.size)
         self.__rect_size = self.__rect.size
 
         self.__size_title_frame = (self.__rect_size[0], self.__rect_size[1] * self.__style.per_height_title_frame)
@@ -301,7 +303,7 @@ class Alert:
                 color=self.__style.text_color,
                 bg_color=self.__style.bg_content_color,
                 antialias=self.__style.antialias,
-                pos=(self.__style.pos[0], self.__style.pos[1] + self.__size_title_frame[1]),
+                pos=(self.__pos[0], self.__pos[1] + self.__size_title_frame[1]),
                 size=self.__size_content_frame,
                 padding=self.__style.padding,
                 line_height=self.__style.line_height
@@ -321,7 +323,7 @@ class Alert:
                 content="X",
                 on_click=lambda: self.__close_alert(),
                 size=to_array((self.__size_title_frame[1], self.__size_title_frame[1])) - 2 * to_array(fix_size_button),
-                pos=to_array(self.__style.pos) + to_array((self.__size_title_frame[0] - self.__size_title_frame[1], 0)) + to_array(fix_size_button)
+                pos=to_array(self.__pos) + to_array((self.__size_title_frame[0] - self.__size_title_frame[1], 0)) + to_array(fix_size_button)
             )
         )
     
@@ -331,6 +333,14 @@ class Alert:
             self.__draw_title()
             self.__text_box.update()
             self.__button_close.update()
+    
+    @property
+    def pos(self) -> Vec2:
+        return self.__pos
+
+    @pos.setter
+    def pos(self, new_pos: Vec2):
+        self.__pos = new_pos
     
     @property
     def visible(self) -> bool: 
@@ -360,7 +370,7 @@ class Alert:
         return self.__type_color
     
     def __draw_title(self):
-        title_frame = pygame.Rect(self.__style.pos, self.__size_title_frame)
+        title_frame = pygame.Rect(self.__pos, self.__size_title_frame)
 
         title_surface = self.__style.font.render(self.__style.title, self.__style.antialias, self.__style.title_color)
         title_rect = title_surface.get_rect(center=title_frame.center)
@@ -375,7 +385,7 @@ class Alert:
         border_width: Vec2 = (self.__style.border, self.__style.border)
 
         size_border: Vec2 = to_array(self.__style.size) + to_array(border_width) * 2
-        pos: Vec2 = to_array(self.__style.pos) - to_array(border_width)
+        pos: Vec2 = to_array(self.__pos) - to_array(border_width)
 
         border = pygame.Rect(
             (int(pos[0]), int(pos[1])),

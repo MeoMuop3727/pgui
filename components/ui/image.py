@@ -228,6 +228,7 @@ class Image:
         self.__surface = surface
         self.__style = style
         self.__visible = style.visible
+        self.__pos = style.pos
 
         self.__path_image = self.__style.path
 
@@ -235,10 +236,18 @@ class Image:
         self.__scale_image()
         self.__image = self.__apply_border_radius()
 
-        self.__rect = pygame.Rect(self.__style.pos, self.__style.size)
+        self.__rect = pygame.Rect(self.__pos, self.__style.size)
     
     def get_rect(self) -> pygame.Rect:
         return self.__rect
+    
+    @property
+    def pos(self) -> Vec2:
+        return self.__pos
+
+    @pos.setter
+    def pos(self, new_pos: Vec2):
+        self.__pos = new_pos
     
     @property 
     def path_image(self) -> str:
@@ -269,7 +278,7 @@ class Image:
     def __draw_border(self):
         border_width: Vec2 = (self.__style.border, self.__style.border)
         size_border = to_array(self.__style.size) + to_array(border_width) * 2
-        pos_border = to_array(self.__style.pos) - to_array(border_width)
+        pos_border = to_array(self.__pos) - to_array(border_width)
 
         border = pygame.Rect(
             (int(pos_border[0]), int(pos_border[1])),

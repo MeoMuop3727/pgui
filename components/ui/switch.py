@@ -221,13 +221,22 @@ class Switch:
         self.__surface = surface
         self.__style = style
         self.__visible = style.visible
+        self.__pos = style.pos 
 
         self.__state = self.__style.state
 
         self.__is_hover = False
         self.__is_pressed = False
 
-        self.__rect = pygame.Rect(self.__style.pos, self.__style.size)
+        self.__rect = pygame.Rect(self.__pos, self.__style.size)
+    
+    @property
+    def pos(self) -> Vec2:
+        return self.__pos
+
+    @pos.setter
+    def pos(self, new_pos: Vec2):
+        self.__pos = new_pos
     
     @property
     def visible(self) -> bool:
@@ -309,9 +318,9 @@ class Switch:
         fix_pos = (5,2)
 
         if not self.__state:
-            pos_thumb: Vec2 = to_array(self.__style.pos) + to_array(fix_pos)
+            pos_thumb: Vec2 = to_array(self.__pos) + to_array(fix_pos)
         else:
-            pos_thumb: Vec2 = to_array(self.__style.pos) + to_array((int(size_thumb[0]), 0)) + to_array(fix_pos)
+            pos_thumb: Vec2 = to_array(self.__pos) + to_array((int(size_thumb[0]), 0)) + to_array(fix_pos)
         
         thumb = pygame.Rect(
             (int(pos_thumb[0]), int(pos_thumb[1])),
@@ -324,7 +333,7 @@ class Switch:
         border_width: Vec2 = (self.__style.border, self.__style.border)
 
         size_border: Vec2 = to_array(self.__style.size) + to_array(border_width) * 2
-        pos: Vec2 = to_array(self.__style.pos) - to_array(border_width)
+        pos: Vec2 = to_array(self.__pos) - to_array(border_width)
 
         border = pygame.Rect(
             (int(pos[0]), int(pos[1])),

@@ -494,8 +494,17 @@ class CheckBoxList:
         self.__surface = surface
         self.__style = style
         self.__visible = style.visible
+        self.__pos = style.pos 
 
         self.__list_check_box: List[CheckBox] = self.__create_list_check_box()
+    
+    @property
+    def pos(self) -> Vec2:
+        return self.__pos
+
+    @pos.setter
+    def pos(self, new_pos: Vec2):
+        self.__pos = new_pos
     
     @property
     def visible(self) -> bool:
@@ -523,7 +532,7 @@ class CheckBoxList:
         for index, label in enumerate(self.__style.label_list):
             index_checked = index if index < len(self.__style.checked_list) else 0
 
-            pos_check_box = to_array(self.__style.pos) + (to_array((0, self.__style.font.get_height())) + to_array((0, self.__style.line_height))) * index
+            pos_check_box = to_array(self.__pos) + (to_array((0, self.__style.font.get_height())) + to_array((0, self.__style.line_height))) * index
 
             check_box = CheckBox(
                 surface=self.__surface,

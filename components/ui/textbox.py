@@ -134,10 +134,19 @@ class TextBox:
         self.__surface = surface
         self.__style = style
         self.__visible = style.visible
+        self.__pos = style.pos
 
-        self.__rect = pygame.Rect(self.__style.pos, self.__style.size)
+        self.__rect = pygame.Rect(self.__pos, self.__style.size)
 
         self.__list_text = self.__wrap_text()
+    
+    @property
+    def pos(self) -> Vec2:
+        return self.__pos
+
+    @pos.setter
+    def pos(self, new_pos: Vec2):
+        self.__pos = new_pos
     
     @property
     def visible(self) -> bool:
@@ -160,7 +169,7 @@ class TextBox:
     def __draw_border(self) -> None:
         border_width: Vec2 = (self.__style.border, self.__style.border)
 
-        pos_border = to_array(self.__style.pos) - to_array(border_width)
+        pos_border = to_array(self.__pos) - to_array(border_width)
         size_border = to_array(self.__style.size) + to_array(border_width) * 2
 
         border = pygame.Rect(
@@ -196,7 +205,7 @@ class TextBox:
     def __draw_content(self) -> None:
         for line, text_line in enumerate(self.__list_text):
             text_surface = self.__style.font.render(text_line, self.__style.antialias, hex_to_rbg(self.__style.color))
-            text_rect = to_array(self.__style.pos) + to_array((0, text_surface.get_height() * line)) + to_array((self.__style.padding, self.__style.padding))
+            text_rect = to_array(self.__pos) + to_array((0, text_surface.get_height() * line)) + to_array((self.__style.padding, self.__style.padding))
 
             self.__surface.blit(text_surface, (int(text_rect[0]), int(text_rect[1])))
 

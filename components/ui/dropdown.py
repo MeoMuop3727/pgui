@@ -401,18 +401,27 @@ class Dropdown:
         self.__surface = surface
         self.__style = style
         self.__visible = style.visible
+        self.__pos = style.pos 
 
         self.__is_open = False
         self.__is_hover_header = False
         self.__is_pressed_header = False
 
-        self.__header = pygame.Rect(self.__style.pos, self.__style.size)
+        self.__header = pygame.Rect(self.__pos, self.__style.size)
 
         self.__active_index = self.__style.selected_index
 
         self.__placeholder = self.__style.placeholder if not self.__style.options else self.__style.options[self.__active_index]
 
         self.__list_options = self.__create_list_options()
+    
+    @property
+    def pos(self) -> Vec2:
+        return self.__pos
+
+    @pos.setter
+    def pos(self, new_pos: Vec2):
+        self.__pos = new_pos
     
     @property
     def visible(self) -> bool:
@@ -456,7 +465,7 @@ class Dropdown:
         list_options: List[ButtonText] = []
 
         for index, label in enumerate(self.__style.options):
-            pos_option = to_array(self.__style.pos) + to_array((0, self.__style.size[1])) * index + to_array((0, self.__style.gap + self.__style.size[1]))
+            pos_option = to_array(self.__pos) + to_array((0, self.__style.size[1])) * index + to_array((0, self.__style.gap + self.__style.size[1]))
 
             option = ButtonText(
                 surface=self.__surface,
@@ -518,7 +527,7 @@ class Dropdown:
     def __draw_border_header(self, color: ColorType) -> None:
         border_width: Vec2 = (self.__style.border, self.__style.border)
         size_border = to_array(self.__style.size) + to_array(border_width) * 2
-        pos_border = to_array(self.__style.pos) - to_array(border_width)
+        pos_border = to_array(self.__pos) - to_array(border_width)
 
         border = pygame.Rect(
             (int(pos_border[0]), int(pos_border[1])),
