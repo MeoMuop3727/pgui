@@ -132,6 +132,7 @@ class Panel:
                  objects: list = []):
         self.__surface = surface
         self.__style = style
+        self.__visible = style.visible
 
         self.__rect = pygame.Rect(self.__style.pos, self.__style.size)
 
@@ -139,8 +140,16 @@ class Panel:
 
         self.objects: list = objects
     
+    @property
+    def visible(self) -> bool:
+        return self.__visible
+    
+    @visible.setter
+    def visible(self, value) -> bool:
+        self.__visible = value
+    
     def update(self) -> None:
-        if self.__style.visible:
+        if self.__visible:
             self.__draw_border()
             self.__draw_bg()
             self.__draw_objects()

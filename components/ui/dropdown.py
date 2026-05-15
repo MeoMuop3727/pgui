@@ -400,6 +400,7 @@ class Dropdown:
                  style: StyleDropdown):
         self.__surface = surface
         self.__style = style
+        self.__visible = style.visible
 
         self.__is_open = False
         self.__is_hover_header = False
@@ -413,8 +414,16 @@ class Dropdown:
 
         self.__list_options = self.__create_list_options()
     
+    @property
+    def visible(self) -> bool:
+        return self.__visible
+    
+    @visible.setter
+    def visible(self, value) -> bool:
+        self.__visible = value
+        
     def update(self) -> None:
-        if self.__style.visible:
+        if self.__visible:
             mouse_pos = pygame.mouse.get_pos()
             self.__is_hover_header = self.__header.collidepoint(mouse_pos)
             

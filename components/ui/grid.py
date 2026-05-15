@@ -225,6 +225,7 @@ class Grid:
                  style: StyleGrid):
         self.__surface = surface
         self.__style = style
+        self.__visible = style.visible
 
         self.__pos = self.__style.pos if self.__style.rect is None else self.__style.rect.topleft
         self.__area = self.__style.area if self.__style.rect is None else self.__style.rect.size
@@ -235,9 +236,17 @@ class Grid:
 
         self.__height_cell = 0
         self.__width_cell = 0
+    
+    @property
+    def visible(self) -> bool:
+        return self.__visible
+    
+    @visible.setter
+    def visible(self, value) -> bool:
+        self.__visible = value
 
     def update(self) -> None:
-        if self.__style.visible:
+        if self.__visible:
             self.__draw_line_row()
             self.__draw_line_col()
             self.__draw_notes()

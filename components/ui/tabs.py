@@ -357,12 +357,21 @@ class Tab:
                  surface: pygame.Surface,
                  style: StyleTab):
         self.__style = style
+        self.__visible = style.visible
 
         self.__tab_panel = TabPanel(surface, style)
         self.__tab_frame = TabFrame(surface, style)
     
+    @property
+    def visible(self) -> bool:
+        return self.__visible
+    
+    @visible.setter
+    def visible(self, value) -> bool:
+        self.__visible = value
+    
     def update(self) -> None:
-        if self.__style.visible:
+        if self.__visible:
             self.__tab_panel.update()
             self.__tab_frame.update(self.__tab_panel.get_tab_panel_active())
 

@@ -133,13 +133,22 @@ class TextBox:
                  style: StyleTextBox):
         self.__surface = surface
         self.__style = style
+        self.__visible = style.visible
 
         self.__rect = pygame.Rect(self.__style.pos, self.__style.size)
 
         self.__list_text = self.__wrap_text()
+    
+    @property
+    def visible(self) -> bool:
+        return self.__visible
+    
+    @visible.setter
+    def visible(self, value) -> bool:
+        self.__visible = value
 
     def update(self) -> None:
-        if self.__style.visible:
+        if self.__visible:
             self.__draw_border()
             self.__draw_frame()
             self.__draw_content()

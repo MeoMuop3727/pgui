@@ -493,11 +493,20 @@ class CheckBoxList:
                  style: StyleCheckBox):
         self.__surface = surface
         self.__style = style
+        self.__visible = style.visible
 
         self.__list_check_box: List[CheckBox] = self.__create_list_check_box()
     
+    @property
+    def visible(self) -> bool:
+        return self.__visible
+    
+    @visible.setter
+    def visible(self, value) -> bool:
+        self.__visible = value
+    
     def update(self) -> None:
-        if self.__style.visible:
+        if self.__visible:
             self.__draw_check_box()
     
     def get_state_check_boxes(self) -> List[bool]:

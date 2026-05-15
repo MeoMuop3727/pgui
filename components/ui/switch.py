@@ -218,9 +218,9 @@ class Switch:
     def __init__(self,
                  surface: pygame.Surface,
                  style: StyleSwitch):
-
         self.__surface = surface
         self.__style = style
+        self.__visible = style.visible
 
         self.__state = self.__style.state
 
@@ -229,8 +229,16 @@ class Switch:
 
         self.__rect = pygame.Rect(self.__style.pos, self.__style.size)
     
+    @property
+    def visible(self) -> bool:
+        return self.__visible
+    
+    @visible.setter
+    def visible(self, value) -> bool:
+        self.__visible = value
+    
     def update(self) -> None:
-        if self.__style.visible:
+        if self.__visible:
             mouse_pos = pygame.mouse.get_pos()
             self.__is_hover = self.__rect.collidepoint(mouse_pos)
             

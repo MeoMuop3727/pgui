@@ -20,7 +20,8 @@ Typical usage:
 """
 
 import pygame, sys
-from .scence import Scence
+from components.scences.scence import Scence
+from utils.utils_typing import Number
 
 class ManageScence:
 
@@ -60,6 +61,10 @@ class ManageScence:
         self.__scences: list[Scence] = []
         self.__running = True
         self.__clock = pygame.time.Clock()
+    
+    def get_scences(self) -> list[Scence]:
+        """Return stack scences @Scence"""
+        return self.__scences
 
     def push_scence(self, scence: Scence) -> None:
         """
@@ -117,7 +122,7 @@ class ManageScence:
 
         return self.__scences[-1] if self.__scences else None
     
-    def run(self, fps: int | float = 60) -> None:
+    def run(self, fps: Number = 60) -> None:
         """
         Start the main game loop.
 

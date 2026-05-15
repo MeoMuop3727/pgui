@@ -227,6 +227,7 @@ class Image:
                  style: StyleImage):
         self.__surface = surface
         self.__style = style
+        self.__visible = style.visible
 
         self.__path_image = self.__style.path
 
@@ -247,8 +248,16 @@ class Image:
     def path_image(self, path: str):
         self.__path_image = path
 
+    @property
+    def visible(self) -> bool:
+        return self.__visible
+    
+    @visible.setter
+    def visible(self, value) -> bool:
+        self.__visible = value
+        
     def update(self):
-        if self.__style.visible:
+        if self.__visible:
             self.__draw_border()
             self.__draw_bg()
             self.__draw_image()

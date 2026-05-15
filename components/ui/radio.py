@@ -249,6 +249,7 @@ class RadioButton:
                  checked: bool = False):
         self.__surface = surface
         self.__style = style
+        self.__visible = style.visible
 
         self.__pos = pos
         self.__label = label
@@ -260,8 +261,16 @@ class RadioButton:
         self.__size_radio_button: Vec2 = (self.__style.font.get_height(), self.__style.font.get_height())
         self.__rect = pygame.Rect(self.__pos, self.__size_radio_button)
     
+    @property
+    def visible(self) -> bool:
+        return self.__visible
+    
+    @visible.setter
+    def visible(self, value) -> bool:
+        self.__visible = value
+    
     def update(self) -> None:
-        if self.__style.visible:
+        if self.__visible:
             mouse_pos = pygame.mouse.get_pos()
             self.__is_hover = self.__rect.collidepoint(mouse_pos)
             

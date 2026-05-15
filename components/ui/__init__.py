@@ -5,25 +5,27 @@ inputs, sliders, dropdowns, and more. Each component follows a consistent Style/
 pattern, making it straightforward to customize and integrate into any pygame project.
 """
 
-from .alert import Alert, StyleAlert
-from .button import Button, ButtonImage, ButtonText, StyleButton
-from .checkbox import CheckBox, CheckBoxList, StyleCheckBox
-from .dropdown import Dropdown, StyleDropdown
-from .grid import Grid, StyleGrid
-from .image import Image, StyleImage
-from .input import Input, StyleInput
-from .label import Label, StyleLabel
-from .panel import Panel, StylePanel
-from .radio import RadioButton, RadioButtonList, StyleRadioButton
-from .scrollbar import ScrollView, StyleScrollView
-from .slider import Slider, StyleSlider
-from .switch import StyleSwitch, Switch
-from .tabs import StyleTab, Tab
-from .textbox import StyleTextBox, TextBox
+from components.ui.alert import Alert, StyleAlert
+from components.ui.button import Button, ButtonImage, ButtonText, StyleButton
+from components.ui.background import BackgroundImage
+from components.ui.checkbox import CheckBox, CheckBoxList, StyleCheckBox
+from components.ui.dropdown import Dropdown, StyleDropdown
+from components.ui.grid import Grid, StyleGrid
+from components.ui.image import Image, StyleImage
+from components.ui.input import Input, StyleInput
+from components.ui.label import Label, StyleLabel
+from components.ui.panel import Panel, StylePanel
+from components.ui.radio import RadioButton, RadioButtonList, StyleRadioButton
+from components.ui.scrollbar import ScrollView, StyleScrollView
+from components.ui.slider import Slider, StyleSlider
+from components.ui.switch import StyleSwitch, Switch
+from components.ui.tabs import StyleTab, Tab
+from components.ui.textbox import StyleTextBox, TextBox
 
 __all__ = [
     "Alert", "StyleAlert",
     "Button", "ButtonImage", "ButtonText", "StyleButton",
+    "BackgroundImage",
     "CheckBox", "CheckBoxList", "StyleCheckBox",
     "Dropdown", "StyleDropdown",
     "Grid", "StyleGrid",

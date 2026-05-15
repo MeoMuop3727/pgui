@@ -1,4 +1,4 @@
-from .manager_scence import ManageScence
-from .scence import Scence
+from components.scences.manager_scence import ManageScence
+from components.scences.scence import Scence
 
 __all__ = ["ManageScence", "Scence"]

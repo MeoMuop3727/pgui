@@ -234,6 +234,7 @@ class Slider:
                  style: StyleSlider):
         self.__surface = surface
         self.__style = style
+        self.__visible = style.visible
 
         self.__is_hovered: bool = False
         self.__is_pressed: bool = False
@@ -244,8 +245,16 @@ class Slider:
         self.__thumb = self.__build_thumb_rect()
         self.__fill = self.__build_fill_rect()
     
+    @property
+    def visible(self) -> bool:
+        return self.__visible
+    
+    @visible.setter
+    def visible(self, value) -> bool:
+        self.__visible = value
+    
     def update(self) -> None:
-        if self.__style.visible:
+        if self.__visible:
             visual_state = self.__get_visual_state()
 
             track_color = self.__get_track_color_state(visual_state)

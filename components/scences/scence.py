@@ -30,6 +30,7 @@ Typical usage:
 """
 
 import pygame
+from  components.scences.manager_scence import ManageScence
 class Scence:
 
     """
@@ -94,7 +95,7 @@ class Scence:
         Initialize the scene with no manager assigned.
         """
 
-        self.manager = None
+        self.manager: ManageScence = None
     
     def on_enter(self) -> None:
         """
