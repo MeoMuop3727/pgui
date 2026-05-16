@@ -148,6 +148,7 @@ class Label:
     @pos.setter
     def pos(self, new_pos: Vec2):
         self.__pos = new_pos
+        self.__rect = pygame.Rect(self.__pos, self.__style.size)
 
     @property
     def visible(self) -> bool:

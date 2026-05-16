@@ -133,12 +133,31 @@ class TextBox:
                  style: StyleTextBox):
         self.__surface = surface
         self.__style = style
+
         self.__visible = style.visible
         self.__pos = style.pos
+        self.__content = style.content
+        self.__size = style.size 
 
-        self.__rect = pygame.Rect(self.__pos, self.__style.size)
+        self.__rect = pygame.Rect(self.__pos, self.__size)
 
         self.__list_text = self.__wrap_text()
+    
+    @property
+    def size(self) -> str:
+        return self.__size
+    
+    @size.setter
+    def size(self, new_size: str):
+        self.__size = new_size
+    
+    @property
+    def content(self) -> str:
+        return self.__content
+    
+    @content.setter
+    def content(self, new_content: str):
+        self.__content = new_content
     
     @property
     def pos(self) -> Vec2:
@@ -170,7 +189,7 @@ class TextBox:
         border_width: Vec2 = (self.__style.border, self.__style.border)
 
         pos_border = to_array(self.__pos) - to_array(border_width)
-        size_border = to_array(self.__style.size) + to_array(border_width) * 2
+        size_border = to_array(self.__size) + to_array(border_width) * 2
 
         border = pygame.Rect(
             (int(pos_border[0]), int(pos_border[1])),
@@ -183,9 +202,9 @@ class TextBox:
         list_text: List[str] = []
 
         current_line = ""
-        max_width = self.__style.size[0] - 2 * self.__style.padding
+        max_width = self.__size[0] - 2 * self.__style.padding
 
-        for text in self.__style.content.split(" "):
+        for text in self.__content.split(" "):
             text_line = text if current_line == "" else current_line + " " + text
 
             text_width = self.__style.font.size(text_line)[0]
