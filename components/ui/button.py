@@ -352,6 +352,17 @@ class Button:
         self.state = self.style.state
 
         self.visible = self.style.visible
+
+        self.on_click = self.style.on_click
+    
+    @property
+    def on_click_button(self):
+        if self.on_click is not None:
+            self.on_click()
+    
+    @on_click_button.setter
+    def on_click_button(self, func: Optional[Callable[[], None]] = None):
+        self.on_click = func
     
     @property
     def visible_button(self) -> bool:
@@ -368,7 +379,7 @@ class Button:
     @pos_button.setter
     def pos_button(self, new_pos: Vec2):
         self.pos = new_pos
-        self.rect(new_pos, self.size)
+        self.rect_button = pygame.Rect(new_pos, self.size)
     
     @property
     def size_button(self) -> Vec2:
@@ -384,8 +395,8 @@ class Button:
         return self.rect
     
     @rect_button.setter
-    def rect_button(self, new_pos: Vec2, new_size: Vec2):
-        self.rect = pygame.Rect(new_pos, new_size)
+    def rect_button(self, new_rect: pygame.Rect):
+        self.rect = new_rect
     
     def get_visual_state(self) -> StateButton:
         if self.style.state == StateButton.DISABLE: return StateButton.DISABLE
@@ -455,6 +466,15 @@ class ButtonText(Button):
              surface: pygame.Surface,
              style: StyleButton):
         super().__init__(surface, style)
+        self.__content = style.content
+    
+    @property
+    def content(self) -> str:
+        return self.__content
+    
+    @content.setter
+    def content(self, new_content: str):
+        self.__content = new_content
     
     def update(self):
         if self.style.visible:
@@ -472,7 +492,7 @@ class ButtonText(Button):
                 if not self.is_pressed: self.is_pressed = True
             else:
                 if self.is_pressed and self.is_hover:
-                    if self.style.on_click is not None: self.style.on_click()
+                    if self.on_click is not None: self.on_click()
                     if self.style.on_sound is not None: self.style.on_sound.play()
                 self.is_pressed = False
                         
@@ -522,7 +542,7 @@ class ButtonText(Button):
         pygame.draw.rect(self.surface, color, button, border_radius=self.style.border_radius)
 
     def __draw_text_button(self, color: ColorType):
-        text_surface = self.style.font.render(self.style.content, self.style.antialias, color)
+        text_surface = self.style.font.render(self.__content, self.style.antialias, color)
         text_rect = text_surface.get_rect(center=self.rect.center)
         self.surface.blit(text_surface, text_rect)
 

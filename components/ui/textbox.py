@@ -144,6 +144,10 @@ class TextBox:
         self.__list_text = self.__wrap_text()
     
     @property
+    def rect(self) -> pygame.Rect:
+        return self.__rect
+    
+    @property
     def size(self) -> str:
         return self.__size
     
