@@ -23,7 +23,7 @@ pip install pygame==2.6.1 numpy==2.4.4
 
 **Using Git Submodule** (for embedding in your own project)
 ```bash
-git submodule add -b develop https://github.com/MeoMuop3727/pgui.git
+git submodule add -b develop https://github.com/MeoMuop3727/pgui.git pgui_module
 git submodule update --init
 ```
 
