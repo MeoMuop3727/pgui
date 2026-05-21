@@ -61,7 +61,7 @@ class ManageScence:
         self.__scences: list[Scence] = []
         self.__running = True
         self.__clock = pygame.time.Clock()
-    
+        
     def get_scences(self) -> list[Scence]:
         """Return stack scences @Scence"""
         return self.__scences
