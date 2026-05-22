@@ -1,0 +1,26 @@
+{
+    "window": {
+        "height": 720,
+        "width": 1280,
+        "max-height": 920,
+        "max-width": 1920,
+        "min-height": 680,
+        "min-width": 1080,
+        "resizable": false,
+        "fullscreen": false,
+        "borderless": false,
+        "intro-doc": "Hello from the pgui - pygame-gui. Verson 1.0.0"
+    },
+    "display": {
+        "caption": "Pygame - PGUI - Debug",
+        "fps": 60,
+        "font-family": null,
+        "icon": "assets/icon.png"
+    },
+    "render": {
+        "background-color": "#FFFFFF"
+    },
+    "debug": {
+        "show-fps": false
+    }
+}
