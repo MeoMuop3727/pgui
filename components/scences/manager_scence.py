@@ -156,8 +156,8 @@ class ManageScence:
             if not current_scence: continue
 
             current_scence.handle_event(events)
-            current_scence.update(dt)
             current_scence.render(self.__screen)
+            current_scence.update(dt)
 
             pygame.display.flip()
             
