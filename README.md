@@ -14,29 +14,6 @@ A lightweight UI framework built on top of pygame, designed for developers who w
 
 ---
 
-## UI Components
-
-| Component | Description |
-|---|---|
-| `Alert` | Popup alert box |
-| `Background` | Fullscreen or partial background renderer |
-| `Button` | Clickable button with style support |
-| `Checkbox` | Toggle checkbox input |
-| `Dropdown` | Dropdown selection menu |
-| `Grid` | Grid layout container |
-| `Image` | Image renderer |
-| `Input` | Text input field |
-| `Label` | Static text label |
-| `Panel` | Bordered container panel |
-| `Radio` | Radio button group |
-| `Scrollbar` | Scrollable area support |
-| `Slider` | Range slider input |
-| `Switch` | Toggle switch |
-| `Tabs` | Tabbed navigation |
-| `TextBox` | Multiline text display box |
-
----
-
 ## Requirements
 
 - Python `3.12.3`
@@ -49,14 +26,14 @@ A lightweight UI framework built on top of pygame, designed for developers who w
 
 **Using Git Clone**
 ```bash
-git clone -b develop https://github.com/MeoMuop3727/pgui.git
+git clone -b main https://github.com/MeoMuop3727/pgui.git
 cd pgui
 pip install pygame==2.6.1 numpy==2.4.4
 ```
 
 **Using Git Submodule** (for embedding in your own project)
 ```bash
-git submodule add -b develop https://github.com/MeoMuop3727/pgui.git pgui_module
+git submodule add -b main https://github.com/MeoMuop3727/pgui.git pgui_module
 git submodule update --init
 ```
 
@@ -114,7 +91,7 @@ pgui/
 │   ├── scences/    # Scene management and base scene classes
 │   └── ui/         # UI components
 ├── config/         # Global configuration and constants
-├── entities/       # Game or application entities
+├── models/         # Game or application entities
 ├── systems/        # Core systems logic
 └── utils/          # Helper functions and type utilities
 ```

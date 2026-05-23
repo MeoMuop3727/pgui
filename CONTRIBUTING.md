@@ -16,14 +16,14 @@ Thank you for your interest in contributing to PGUI! This document outlines the 
 
 **Using Git Clone**
 ```bash
-git clone -b develop https://github.com/MeoMuop3727/pgui.git
+git clone -b main https://github.com/MeoMuop3727/pgui.git
 cd pgui
 pip install pygame==2.6.1 numpy==2.4.4
 ```
 
 **Using Git Submodule** (for embedding in your own project)
 ```bash
-git submodule add -b develop https://github.com/MeoMuop3727/pgui.git pgui_module
+git submodule add -b main https://github.com/MeoMuop3727/pgui.git pgui_module
 git submodule update --init
 ```
 
@@ -38,7 +38,7 @@ pgui/
 │   ├── scences/    # Scene management and base scene classes
 │   └── ui/         # UI components (buttons, text boxes, etc.)
 ├── config/         # Global configuration and constants
-├── entities/       # Game or application entities
+├── models/         # Game or application entities
 ├── systems/        # Core systems logic
 └── utils/          # Helper functions and type utilities
 ```
@@ -63,6 +63,7 @@ Branch naming convention:
 - `feature/` — new features
 - `fix/` — bug fixes
 - `docs/` — documentation changes
+- `refactor/` — Refactor code
 
 ---
 
