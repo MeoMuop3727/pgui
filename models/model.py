@@ -16,16 +16,17 @@ It includes:
                     collision detection but are not affected by physics.
                     Subclass this for walls, platforms, obstacles, and props.
 """
+from __future__ import annotations
 
 import pygame
 import numpy as np
 
 from typing import Optional
-from utils.utils_typing import Vec2
+from utils.utils_typing import Vec2, Model
 from models.animation import Animation
 
-class CharacterBody:
-
+class CharacterBody:  
+    
     """
     A base class for physics-driven characters in a pygame game.
 
@@ -147,20 +148,24 @@ class CharacterBody:
     Example
     -------
 >>> class Player(CharacterBody):
-        def __init__(self, surface):
+        def __init__(self, surface: pygame.Surface):
             super().__init__()
-            self.pos = np.array([100.0, 200.0])
-            self.animation = Animation(surface, "assets/player", size=(64, 64))
-            self.current_state = "idle"
         def on_update(self, dt):
             keys = pygame.key.get_pressed()
             direction = np.array([0.0, 0.0])
             if keys[pygame.K_LEFT]: direction[0] = -1
             if keys[pygame.K_RIGHT]: direction[0] = 1
             if keys[pygame.K_SPACE] and self.on_ground:
-                self.velocity[1] = -400.0
+                self.velocity[1] = -500.0
+                self.on_ground = False         
+            if self.pos[1] <= 10:
+                self.pos[1] = 10
+                self.velocity[1] = 500
+            if self.pos[1] >= 300:
+                self.pos[1] = 300
+                self.on_ground = True
             self.acceleration = np.array([500.0, 0.0])
-            self.move(direction)
+            self.move_x(direction)
     """
 
     def __init__(self):
@@ -196,6 +201,10 @@ class CharacterBody:
     #  Override these in subclasses                                      #
     # ------------------------------------------------------------------ #
 
+    # ------------------------------------------------------------------ #
+    #  Override these in subclasses                                      #
+    # ------------------------------------------------------------------ #
+
     def on_ready(self):
         """Called once when the character is first added to the scene."""
         pass
@@ -204,7 +213,7 @@ class CharacterBody:
         """Game logic — override in subclass (input, AI, state machine...)."""
         pass
 
-    def on_collision(self, other: "CharacterBody"):
+    def on_collision(self, others: list[Model]):
         """Called when this character collides with another. Override to handle."""
         pass
 
@@ -216,12 +225,19 @@ class CharacterBody:
         """Adds a force vector to acceleration (F = ma → a += F / m)."""
         self.acceleration += force / self.mass
 
-    def move(self, direction: np.ndarray):
+    def move_x(self, direction: np.ndarray):
         """
-        Applies a normalized direction vector to velocity.
+        Applies a normalized direction x vector to velocity.
         Call this inside on_update() for movement input.
         """
-        self.velocity += direction * self.acceleration
+        self.velocity[0] = direction[0] * self.acceleration[0]
+
+    def move_y(self, direction: np.ndarray):
+        """
+        Applies a normalized direction y vector to velocity.
+        Call this inside on_update() for movement input.
+        """
+        self.velocity[1] = direction[1] * self.acceleration[1]
 
     # ------------------------------------------------------------------ #
     #  Internal update — called by the scene each frame                  #
@@ -376,7 +392,7 @@ class StaticBody:
         """Called once when the object is first added to the scene."""
         pass
 
-    def on_collision(self, other: list["CharacterBody"]):
+    def on_collision(self, others: list[Model]):
         """Called when a character collides with this object. Override to handle."""
         pass
 
