@@ -167,7 +167,7 @@ class CharacterBody:
         # Collision
         self.rect: pygame.Rect = pygame.Rect(self.pos, self.size)
         self.collision_layer: int = 0
-        self.collision_mask: int = 0
+        self.collision_mask: list[int] = 0
 
         # State
         self.visible: bool = True

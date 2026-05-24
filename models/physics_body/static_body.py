@@ -4,7 +4,6 @@ import pygame
 
 from typing import Optional
 from utils.utils_typing import Vec2, Model
-from models.animation.animation import Animation
 
 class StaticBody:
     
@@ -105,7 +104,7 @@ class StaticBody:
         # Collision
         self.rect: pygame.Rect = pygame.Rect(self.pos, self.size)
         self.collision_layer: int = 0
-        self.collision_mask: int = 0
+        self.collision_mask: list[int] = 0
 
         # State
         self.visible: bool = True
