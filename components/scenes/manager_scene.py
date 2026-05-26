@@ -20,7 +20,7 @@ Typical usage:
 """
 
 import pygame, sys
-from components.scences.scence import Scence
+from components.scenes.scene import Scence
 from utils.utils_typing import Number
 
 class ManageScence:

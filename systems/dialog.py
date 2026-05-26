@@ -45,7 +45,7 @@ import pygame
 from typing import Optional
 from utils.utils_typing import Number
 
-from components.scences.scence import Scence
+from components.scenes.scene import Scence
 from components.ui import *
 from utils.utils_transform import to_array
 

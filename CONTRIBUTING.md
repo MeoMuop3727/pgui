@@ -1,97 +1,201 @@
 # Contributing to PGUI
 
-Thank you for your interest in contributing to PGUI! This document outlines the guidelines for getting started and submitting contributions.
+Thank you for your interest in contributing to PGUI.
+
+PGUI is a lightweight UI and utility framework built on top of pygame, focused on reusable architecture, clean project organization, and beginner-friendly development workflows.
 
 ---
 
-## Requirements
+# Requirements
 
-- Python `3.12.3`
-- pygame `2.6.1`
-- numpy `2.4.4`
+- Python `3.12+`
+- pip `24+`
+
+Main dependencies are managed automatically through `pyproject.toml`.
 
 ---
 
-## Installation
+# Installation
 
-**Using Git Clone**
+## Clone Repository
+
 ```bash
-git clone -b main https://github.com/MeoMuop3727/pgui.git
+git clone -b develop https://github.com/MeoMuop3727/pgui.git
 cd pgui
-pip install pygame==2.6.1 numpy==2.4.4
 ```
 
-**Using Git Submodule** (for embedding in your own project)
+---
+
+## Create Virtual Environment (Recommended)
+
+### Linux / WSL
+
 ```bash
-git submodule add -b main https://github.com/MeoMuop3727/pgui.git pgui_module
-git submodule update --init
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### Windows PowerShell
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
 ```
 
 ---
 
-## Project Structure
+## Install PGUI
 
+```bash
+pip install -e .
 ```
+
+This command will:
+
+- Install all required dependencies automatically
+- Install `pgui` in editable mode
+- Reflect source code changes instantly without reinstalling
+
+---
+
+# Using as a Git Submodule
+
+PGUI can also be embedded directly into another project.
+
+```bash
+git submodule add -b develop https://github.com/MeoMuop3727/pgui.git libs/pgui
+git submodule update --init --recursive
+```
+
+Then install locally:
+
+```bash
+pip install -e ./libs/pgui
+```
+
+---
+
+# Project Structure
+
+```txt
 pgui/
-├── assets/         # Images, fonts, and other static resources
-├── components/
-│   ├── scences/    # Scene management and base scene classes
-│   └── ui/         # UI components (buttons, text boxes, etc.)
-├── config/         # Global configuration and constants
-├── models/         # Game or application entities
-├── systems/        # Core systems logic
-└── utils/          # Helper functions and type utilities
+│
+├── pgui/
+│   ├── assets/         # Fonts, images, static resources
+│   ├── components/     # Reusable UI components
+│   ├── scenes/         # Scene system and scene management
+│   ├── systems/        # Core engine systems
+│   ├── models/         # Core object models
+│   ├── config/         # Framework configuration
+│   ├── utils/          # Helper utilities
+│   └── __init__.py
+│
+├── pyproject.toml
+├── README.md
+├── CONTRIBUTING.md
+├── LICENSE
+└── .gitignore
 ```
 
 ---
 
-## Branching
+# Branch Workflow
 
 | Branch | Purpose |
 |---|---|
-| `main` | Stable releases only |
-| `develop` | Active development — use this as your base |
+| `main` | Stable releases |
+| `develop` | Active development |
 
-When contributing, **always branch off from `develop`**:
+Always branch from `develop`.
 
 ```bash
 git checkout develop
 git checkout -b feature/your-feature-name
 ```
 
-Branch naming convention:
-- `feature/` — new features
-- `fix/` — bug fixes
-- `docs/` — documentation changes
-- `refactor/` — Refactor code
+---
+
+# Branch Naming Convention
+
+| Prefix | Purpose |
+|---|---|
+| `feature/` | New feature |
+| `fix/` | Bug fix |
+| `docs/` | Documentation |
+| `refactor/` | Refactor existing code |
+| `test/` | Testing related changes |
+
+Examples:
+
+```txt
+feature/button-animation
+fix/input-focus
+docs/update-readme
+```
 
 ---
 
-## Submitting a Pull Request
+# Pull Request Guidelines
 
 1. Fork the repository
-2. Create a new branch from `develop`
-3. Make your changes
-4. Open a Pull Request targeting the `develop` branch
-5. Describe clearly what your PR does and why
+2. Create a branch from `develop`
+3. Commit your changes clearly
+4. Open a Pull Request targeting `develop`
+5. Describe:
+   - What changed
+   - Why it changed
+   - Screenshots or examples if applicable
 
 ---
 
-## Code Style
+# Code Style
 
-Currently follows basic [PEP8](https://peps.python.org/pep-0008/) conventions. A more detailed style guide will be defined in a future release.
+PGUI currently follows general PEP8 conventions.
 
-Key points for now:
-- Use `snake_case` for functions and variables
-- Use `PascalCase` for classes
-- Keep functions focused and small
-- Add docstrings to public classes and methods
+## Naming
+
+| Type | Convention |
+|---|---|
+| Variables | `snake_case` |
+| Functions | `snake_case` |
+| Classes | `PascalCase` |
+| Constants | `UPPER_CASE` |
 
 ---
 
-## Reporting Issues
+## General Guidelines
 
-If you find a bug or have a feature request, please open an issue with:
-- A clear title
-- Steps to reproduce (for bugs)
-- Expected vs actual behavior
+- Keep functions small and focused
+- Prefer composition over deeply coupled logic
+- Add docstrings to public APIs
+- Avoid hardcoded values when reusable constants are possible
+- Keep modules responsibility-focused
+
+---
+
+# Reporting Issues
+
+When reporting bugs, include:
+
+- Clear description
+- Steps to reproduce
+- Expected behavior
+- Actual behavior
+- Python version
+- OS information
+
+---
+
+# Future Plans
+
+Planned improvements include:
+
+- Automated testing
+- CI/CD workflows
+- Documentation website
+- Theme system
+- Advanced UI layout system
+
+---
+
+Thank you for helping improve PGUI.

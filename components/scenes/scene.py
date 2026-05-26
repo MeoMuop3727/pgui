@@ -90,7 +90,7 @@ class Scence:
     """
 
     def __init__(self) -> None:
-        from components.scences.manager_scence import ManageScence
+        from components.scenes.manager_scene import ManageScence
         
         """
         Initialize the scene with no manager assigned.
