@@ -36,7 +36,7 @@ Typical usage:
 >>> anim.current_animation = "assets/player/run"
 """
 
-import pygame, os
+import pygame, os, re 
 
 from pgui.utils.utils_typing import Vec2, ColorType
 from pathlib import Path
@@ -275,7 +275,7 @@ class Animation:
         list_image: dict[str, list[pygame.Surface]] = {}
 
         for root, _, files in os.walk(self.__path):
-            for file in sorted(files):
+            for file in sorted(files, key=lambda f: int(re.sub(r'\D', '', f) or 0)):
                 if str(root) not in list_image: list_image[str(root)] = []
 
                 full_path = Path(root) / file
