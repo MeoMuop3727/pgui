@@ -28,3 +28,7 @@ keywords = [
     "game",
     "framework"
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pgui*"]
