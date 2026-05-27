@@ -1,6 +1,6 @@
 """Utility module for loading and managing application configuration files."""
 
-PATH_CONFIG_SCREEN = "config/_screen.json"
+PATH_CONFIG_SCREEN = "pgui/config/_screen.json"
 
 import json
 

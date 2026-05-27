@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to PGUI.
 
-PGUI is a lightweight UI and utility framework built on top of pygame, focused on reusable architecture, clean project organization, and beginner-friendly development workflows.
+PGUI is a lightweight UI framework built on top of pygame, focused on reusable architecture, clean project organization, and beginner-friendly development workflows.
 
 ---
 
@@ -11,7 +11,46 @@ PGUI is a lightweight UI and utility framework built on top of pygame, focused o
 - Python `3.12+`
 - pip `24+`
 
-Main dependencies are managed automatically through `pyproject.toml`.
+All dependencies are managed automatically through `pyproject.toml`.
+
+---
+
+# Repository Structure
+
+PGUI follows the standard Python package layout.
+
+```txt
+pgui/
+│
+├── pgui/                 # Main Python package
+│   ├── assets/
+│   ├── components/
+│   ├── config/
+│   ├── models/
+│   ├── scenes/
+│   ├── systems/
+│   ├── utils/
+│   └── __init__.py
+│
+├── tests/                # Testing modules
+├── pyproject.toml        # Package configuration
+├── README.md
+├── CONTRIBUTING.md
+├── LICENSE
+└── .gitignore
+```
+
+Notes:
+
+- The outer `pgui/` directory is the repository root
+- The inner `pgui/` directory is the actual Python package
+- All importable source code must remain inside the inner package directory
+
+Example:
+
+```python
+from pgui.components.ui import *
+```
 
 ---
 
@@ -53,7 +92,8 @@ pip install -e .
 This command will:
 
 - Install all required dependencies automatically
-- Install `pgui` in editable mode
+- Register the `pgui` package locally
+- Enable editable development mode
 - Reflect source code changes instantly without reinstalling
 
 ---
@@ -75,27 +115,24 @@ pip install -e ./libs/pgui
 
 ---
 
-# Project Structure
+# Shared Virtual Environment (Optional)
 
-```txt
-pgui/
-│
-├── pgui/
-│   ├── assets/         # Fonts, images, static resources
-│   ├── components/     # Reusable UI components
-│   ├── scenes/         # Scene system and scene management
-│   ├── systems/        # Core engine systems
-│   ├── models/         # Core object models
-│   ├── config/         # Framework configuration
-│   ├── utils/          # Helper utilities
-│   └── __init__.py
-│
-├── pyproject.toml
-├── README.md
-├── CONTRIBUTING.md
-├── LICENSE
-└── .gitignore
+PGUI works well with a shared virtual environment workflow.
+
+Example:
+
+```bash
+python3 -m venv ~/python-envs/game-dev
+source ~/python-envs/game-dev/bin/activate
 ```
+
+Then install PGUI into that environment:
+
+```bash
+pip install -e .
+```
+
+This avoids reinstalling dependencies across multiple projects.
 
 ---
 
@@ -139,12 +176,12 @@ docs/update-readme
 
 1. Fork the repository
 2. Create a branch from `develop`
-3. Commit your changes clearly
+3. Commit changes clearly and consistently
 4. Open a Pull Request targeting `develop`
 5. Describe:
    - What changed
    - Why it changed
-   - Screenshots or examples if applicable
+   - Screenshots/examples if applicable
 
 ---
 
@@ -152,7 +189,7 @@ docs/update-readme
 
 PGUI currently follows general PEP8 conventions.
 
-## Naming
+## Naming Conventions
 
 | Type | Convention |
 |---|---|
@@ -166,10 +203,11 @@ PGUI currently follows general PEP8 conventions.
 ## General Guidelines
 
 - Keep functions small and focused
-- Prefer composition over deeply coupled logic
+- Prefer composition over tightly coupled logic
 - Add docstrings to public APIs
-- Avoid hardcoded values when reusable constants are possible
+- Avoid unnecessary global state
 - Keep modules responsibility-focused
+- Prefer reusable systems over hardcoded behaviors
 
 ---
 
@@ -182,7 +220,7 @@ When reporting bugs, include:
 - Expected behavior
 - Actual behavior
 - Python version
-- OS information
+- Operating system information
 
 ---
 
@@ -195,6 +233,8 @@ Planned improvements include:
 - Documentation website
 - Theme system
 - Advanced UI layout system
+- Animation utilities
+- Layout containers
 
 ---
 

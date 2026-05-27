@@ -1,8 +1,22 @@
 # PGUI
 
-PGUI is a lightweight UI framework built on top of pygame, designed for developers who want to build small to medium-sized PC games — such as visual novels, RPGs, dialogue systems, and similar genres — without rebuilding common UI and scene management systems from scratch.
+PGUI is a lightweight UI framework built on top of pygame, designed for developers who want to create small to medium-sized PC games — such as visual novels, RPGs, dialogue systems, and similar genres — without rebuilding common UI and scene management systems from scratch.
 
 > ⚠️ Currently supports PC platforms only.
+
+---
+
+# Why PGUI?
+
+PGUI focuses on:
+
+- Reusable architecture
+- Clean project organization
+- Beginner-friendly workflows
+- Rapid prototyping
+- Easy integration with existing pygame projects
+
+The framework is intended to reduce repetitive boilerplate while remaining lightweight and extensible.
 
 ---
 
@@ -10,8 +24,9 @@ PGUI is a lightweight UI framework built on top of pygame, designed for develope
 
 - Reusable UI components
 - Built-in scene management system
-- Lightweight and beginner-friendly architecture
+- Lightweight architecture
 - Extensible component design
+- Editable install workflow for framework development
 - Easy integration into existing pygame projects
 
 ---
@@ -21,7 +36,7 @@ PGUI is a lightweight UI framework built on top of pygame, designed for develope
 - Python `3.12+`
 - pip `24+`
 
-All required dependencies are installed automatically through `pyproject.toml`.
+All required dependencies are managed automatically through `pyproject.toml`.
 
 ---
 
@@ -62,8 +77,9 @@ pip install -e .
 
 This command will:
 
-- Install all dependencies automatically
-- Install `pgui` in editable mode
+- Install all required dependencies automatically
+- Register the `pgui` package locally
+- Enable editable development mode
 - Reflect source code changes instantly without reinstalling
 
 ---
@@ -130,20 +146,23 @@ manager.run()
 
 # Project Structure
 
+PGUI follows the standard Python package layout.
+
 ```txt
 pgui/
 │
-├── pgui/
-│   ├── assets/         # Images, fonts, and static resources
-│   ├── components/     # Reusable UI components
-│   ├── scenes/         # Scene system and scene management
-│   ├── systems/        # Core systems
-│   ├── models/         # Core object models
-│   ├── config/         # Framework configuration
-│   ├── utils/          # Helper utilities
+├── pgui/                 # Main Python package
+│   ├── assets/           # Images, fonts, and static resources
+│   ├── components/       # Reusable UI components
+│   ├── scenes/           # Scene system and scene management
+│   ├── systems/          # Core systems
+│   ├── models/           # Core object models
+│   ├── config/           # Framework configuration
+│   ├── utils/            # Helper utilities
 │   └── __init__.py
 │
-├── pyproject.toml
+├── tests/                # Testing modules
+├── pyproject.toml        # Package configuration
 ├── README.md
 ├── CONTRIBUTING.md
 ├── LICENSE
@@ -154,7 +173,7 @@ pgui/
 
 # Documentation
 
-Each public module contains inline docstrings and usage examples.
+Each public module includes inline docstrings and usage examples.
 
 Additional documentation will be expanded in future releases.
 
