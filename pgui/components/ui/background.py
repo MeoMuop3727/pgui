@@ -57,6 +57,7 @@ Notes
 import pygame
 from typing import Optional
 from pgui.utils.utils_transform import hex_to_rbg
+from pgui.utils.utils_typing import Vec2
 
 class BackgroundImage:
 
@@ -110,20 +111,28 @@ class BackgroundImage:
         self.__surface = surface
         self.__visible = True
         self.__error_load_img = False
-        self.pos = (0,0)
+        self.__pos = (0,0)
 
         try:
             self.__background_img = pygame.image.load(path)
         except FileNotFoundError:
-            self.__background_img = pygame.Rect(self.pos, surface.get_size())
+            self.__background_img = pygame.Rect(self.__pos, surface.get_size())
             self.__error_load_img = True
+
+    @property
+    def pos(self) -> Vec2:
+        return self.__pos
+    
+    @pos.setter
+    def pos(self, value):
+        self.__pos = value
 
     @property
     def visible(self) -> bool:
         return self.__visible
     
     @visible.setter
-    def visible(self, value) -> bool:
+    def visible(self, value):
         self.__visible = value
 
     def update(self):
