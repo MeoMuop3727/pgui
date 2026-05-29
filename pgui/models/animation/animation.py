@@ -145,6 +145,14 @@ class Animation:
         self.__image = ...
     
     @property
+    def loop(self) -> bool:
+        return self.__loop
+    
+    @loop.setter
+    def loop(self, rev: bool):
+        self.__loop = rev 
+    
+    @property
     def list_animation(self) -> list[str]:
         return list(self.__list_image.keys())
 
