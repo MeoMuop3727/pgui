@@ -1,29 +1,3 @@
-"""
-Label Module
-============
-This module provides a static text label UI component built on top of pygame.
-The label renders centered text inside a styled rectangular frame,
-with support for border, background color, and dynamic content updates.
-
-It includes:
-- `StyleLabel` : Dataclass holding all style/configuration options for a label.
-- `Label`      : Renders a styled text label with a background frame and optional border.
-
-Typical usage:
->>> style = StyleLabel(
-        content="Hello World",
-        color="#ffffff",
-        bg_color="#333333",
-        size=(200, 50),
-        pos=(100, 100)
-    )
-    label = Label(surface, style)
-    # Inside game loop
-    label.update()
-    # Update text dynamically
-    label.content = "New Text"
-"""
-
 import pygame
 
 from dataclasses import dataclass
@@ -33,36 +7,6 @@ from pgui.utils.utils_transform import to_array, hex_to_rbg
 
 @dataclass(slots=True)
 class StyleLabel:
-
-    """
-    Dataclass containing all visual and layout configuration for a Label.
-
-    Attributes
-    ----------
-    content : str
-        The text displayed inside the label. Defaults to empty string.
-    font : pygame.font.Font
-        Font used to render the label text.
-    color : ColorType
-        Text color. Defaults to #333333.
-    bg_color : ColorType
-        Background color of the label frame. Defaults to #cccccc.
-    antialias : bool
-        Whether to apply antialiasing to rendered text. Defaults to True.
-    pos : Vec2
-        Position (x, y) of the label on the surface.
-    size : Vec2
-        Size (width, height) of the label frame.
-    border : int
-        Border thickness in pixels. 0 means no border.
-    border_radius : int
-        Corner radius for rounded borders. Defaults to 0.
-    border_color : ColorType
-        Color of the border. Defaults to #000000.
-    visible : bool
-        Whether the label is rendered. Defaults to True.
-    """
-
     content: str = ""
     font: pygame.font.Font = pygame.font.Font(None, 25)
     color: ColorType = "#333333"
@@ -75,60 +19,7 @@ class StyleLabel:
     border_color: ColorType = "#000000"
     visible: bool = True
 
-class Label: 
-
-    """
-    A static text label that renders centered text inside a styled rectangular frame.
-
-    The label text can be updated dynamically at any time via the ``content`` property
-    without needing to recreate the component.
-
-    Rendering order (back to front)
-    --------------------------------
-    1. Border   (slightly larger rect behind the frame)
-    2. Frame    (the main background rect)
-    3. Text     (centered horizontally and vertically within the frame)
-
-    Attributes
-    ----------
->>> surface : pygame.Surface
-    
-        The surface on which the label is drawn.
-    
->>> style : StyleLabel
-    
-        The style/configuration object for this label.
-
-    Properties
-    ----------
->>> content : str
-    
-        Gets or sets the text displayed inside the label.
-        Changes are reflected immediately on the next ``update()`` call.
-
-    Methods
-    -------
->>> update() -> None
-    
-        Draws the border, background frame, and centered text each frame.
-        Does nothing if ``StyleLabel.visible`` is False.
-
-    Example
-    -------
->>> style = StyleLabel(
-            content="Score: 0",
-            color="#ffffff",
-            bg_color="#222222",
-            size=(150, 40),
-            pos=(10, 10)
-        )
-        label = Label(surface, style)
-        # Inside game loop
-        label.update()
-        # Update dynamically
-        label.content = f"Score: {score}"
-    """
-    
+class Label:    
     def __init__(self,
                  surface: pygame.Surface,
                  style: StyleLabel):

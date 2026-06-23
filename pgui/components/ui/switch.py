@@ -1,31 +1,3 @@
-"""
-Switch Module
-=============
-This module provides a toggle switch UI component built on top of pygame.
-
-The switch supports two states (ON/OFF) and responds to mouse interaction
-with hover, pressed, and active visual feedback. Colors for the track,
-thumb, and border are all configurable per state.
-
-It includes:
-- `StateSwitch`  : Class defining constants for the visual states of a switch.
-- `StyleSwitch`  : Dataclass holding all style/configuration options for a switch.
-- `Switch`       : Renders a toggle switch and manages its ON/OFF state.
-
-Typical usage:
->>> style = StyleSwitch(
-        track_color="#cccccc",
-        track_color_active="#4caf50",
-        size=(70, 36),
-        on_click=lambda is_on: print(f"Switch is {'ON' if is_on else 'OFF'}")
-    )
-    switch = Switch(surface, style)
-    # Inside game loop
-    switch.update()
-    # Read current state
-    is_on = switch.get_state()
-"""
-
 import pygame
 
 from dataclasses import dataclass
@@ -35,95 +7,12 @@ from pgui.utils.utils_typing import Vec2, ColorType
 from pgui.utils.utils_transform import to_array, hex_to_rbg
 
 class StateSwitch:
-
-    """
-    Constants representing the visual states of a Switch.
-
-    States
-    ------
-    NORMAL : int
-        Default state — no interaction is occurring.
-    HOVER : int
-        The mouse cursor is hovering over the switch.
-    PRESSED : int
-        The switch is currently being held down by the mouse.
-
-    Note
-    ----
-    The active (ON/OFF) state of the switch is tracked separately
-    via `Switch.__state` and overlays the visual state when ON.
-    """
-
     NORMAL = 1
     HOVER = 2
     PRESSED = 3
 
 @dataclass(slots=True)
 class StyleSwitch:
-
-    """
-    Dataclass containing all visual and behavioral configuration for a Switch.
-
-    State-based styling
-    -------------------
-    Each visual property (track_color, thumb_color, border_color) has four
-    variants corresponding to the interaction state: normal, hover, pressed,
-    and active (ON). The active state takes priority over all other states
-    when the switch is toggled ON.
-
-    Attributes
-    ----------
-    track_color : ColorType
-        Track background color in normal state.
-    thumb_color : ColorType
-        Thumb color in normal state.
-    border_color : ColorType
-        Border color in normal state.
-
-    track_color_pressed : ColorType
-        Track color when pressed.
-    thumb_color_pressed : ColorType
-        Thumb color when pressed.
-    border_color_pressed : ColorType
-        Border color when pressed.
-
-    track_color_hover : ColorType
-        Track color when hovered.
-    thumb_color_hover : ColorType
-        Thumb color when hovered.
-    border_color_hover : ColorType
-        Border color when hovered.
-
-    track_color_active : ColorType
-        Track color when the switch is ON.
-    thumb_color_active : ColorType
-        Thumb color when the switch is ON.
-    border_color_active : ColorType
-        Border color when the switch is ON.
-
-    General
-    -------
-    border : int
-        Border thickness in pixels. 0 means no border.
-    border_radius : int
-        Corner radius for the track and border. Defaults to 50 (pill shape).
-    on_click : Callable[[bool], None], optional
-        Callback triggered when the switch is toggled.
-        Receives the new state as a boolean.
-    on_sound : pygame.mixer.Sound, optional
-        Sound played when the switch is toggled.
-    size : Vec2
-        Size (width, height) of the switch track.
-    pos : Vec2
-        Position (x, y) of the switch on the surface.
-    state : bool or Literal[0, 1]
-        Initial ON/OFF state of the switch. Defaults to 0 (OFF).
-    visible : bool
-        Whether the switch is rendered and interactive. Defaults to True.
-    padding : int
-        Inner spacing between the track edge and the thumb.
-    """
-
     # normal
     track_color: ColorType = "#cccccc"
     thumb_color: ColorType = "#333333"
@@ -161,60 +50,6 @@ class StyleSwitch:
     padding: int = 5
 
 class Switch:
-
-    """
-    A toggle switch component that renders a track and a sliding thumb,
-    and manages an ON/OFF state triggered by mouse clicks.
-
-    When clicked, the switch toggles its internal state and moves
-    the thumb from left (OFF) to right (ON). Colors for all visual
-    elements update based on the current interaction and toggle state.
-
-    Rendering order (back to front)
-    --------------------------------
-    1. Border  (slightly larger rect behind the track)
-    2. Track   (the background pill shape)
-    3. Thumb   (the sliding indicator inside the track)
-
-    State priority
-    --------------
-    Active (ON) state overrides hover and pressed colors,
-    ensuring the ON appearance is always visually distinct.
-
-    Attributes
-    ----------
->>> surface : pygame.Surface
-
-        The surface on which the switch is drawn.
-
->>> style : StyleSwitch
-
-        The style/configuration object for this switch.
-
-    Methods
-    -------
->>> update() -> None
-
-        Handles mouse interaction, updates toggle state,
-        and draws the switch each frame.
-        Does nothing if `StyleSwitch.visible` is False.
-
->>> get_state() -> bool or Literal[0, 1]
-
-        Returns the current ON/OFF state of the switch.
-
-    Example
-    -------
->>> style = StyleSwitch(
-            track_color_active="#4caf50",
-            size=(70, 36),
-            on_click=lambda is_on: print(is_on)
-        )
-        switch = Switch(surface, style)
-        # Inside game loop
-        switch.update()
-    """
-
     def __init__(self,
                  surface: pygame.Surface,
                  style: StyleSwitch):

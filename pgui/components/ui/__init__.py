@@ -10,6 +10,7 @@ from pgui.components.ui.button import Button, ButtonImage, ButtonText, StyleButt
 from pgui.components.ui.background import BackgroundImage
 from pgui.components.ui.checkbox import CheckBox, CheckBoxList, StyleCheckBox
 from pgui.components.ui.dropdown import Dropdown, StyleDropdown
+from pgui.components.ui.dialog import Dialog
 from pgui.components.ui.grid import Grid, StyleGrid
 from pgui.components.ui.image import Image, StyleImage
 from pgui.components.ui.input import Input, StyleInput
@@ -28,6 +29,7 @@ __all__ = [
     "BackgroundImage",
     "CheckBox", "CheckBoxList", "StyleCheckBox",
     "Dropdown", "StyleDropdown",
+    "Dialog",
     "Grid", "StyleGrid",
     "Image", "StyleImage",
     "Input", "StyleInput",

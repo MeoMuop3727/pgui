@@ -1,30 +1,3 @@
-"""
-ScrollView Module
-=================
-This module provides a scrollable viewport UI component built on top of pygame and numpy.
-Content larger than the viewport is rendered through clipping, with a draggable
-scrollbar indicating and controlling the current scroll position.
-
-It includes:
-- `StateScrollbar`  : Enum defining the visual states of the scrollbar.
-- `StyleScrollView` : Dataclass holding all style/configuration options for a scroll view.
-- `ScrollView`      : Renders a clipped viewport with mouse wheel and drag scrolling.
-
-Typical usage:
->>> def render_content(surface: pygame.Surface, offset: np.ndarray):
-        for i, item in enumerate(items):
-            y = 10 + i * 40 - int(offset[1])
-            pygame.draw.rect(surface, (200, 200, 200), (10, y, 280, 30))
->>> style = StyleScrollView(
-        pos=(50, 50),
-        size=(300, 300),
-        content_size=(300, 800),
-        direction="vertical"
-    ) 
-    scroll = ScrollView(surface, style, render_func=render_content)
-    scroll.update() # Inside game loop
-"""
-
 import pygame
 import numpy as np
 
@@ -36,70 +9,12 @@ from pgui.utils.utils_typing import Vec2, ColorType
 from pgui.utils.utils_transform import hex_to_rbg, to_array
 
 class StateScrollbar(Enum):
-
-    """
-    Enum representing the visual states of the scrollbar thumb.
-
-    States
-    ------
-    NORMAL : int
-        Default state — no interaction is occurring.
-    HOVER : int
-        The mouse cursor is hovering over the scrollbar thumb.
-    PRESSED : int
-        Reserved for future use — scrollbar is being pressed.
-    ACTIVE : int
-        The scrollbar thumb is currently being dragged.
-    """
-
     NORMAL = 1
     HOVER = 2
     PRESSED = 3
     ACTIVE = 4
 @dataclass(slots=True)
 class StyleScrollView:
-
-    """
-    Dataclass containing all visual and behavioral configuration for a ScrollView.
-
-    Attributes
-    ----------
-    pos : Vec2
-        Position (x, y) of the viewport on the surface. Defaults to (0, 0).
-    size : Vec2
-        Size (width, height) of the visible viewport. Defaults to (300, 300).
-    content_size : Vec2
-        Total size (width, height) of the scrollable content area.
-        Should be larger than ``size`` to enable scrolling. Defaults to (300, 800).
-    border_radius : int
-        Corner radius of the viewport background rect. Defaults to 0.
-    scrollbar_border_radius : int
-        Corner radius of the scrollbar thumb rect. Defaults to 0.
-    direction : Literal["vertical", "horizontal"]
-        Scroll direction. Defaults to "vertical".
-    scroll_speed : int
-        Number of pixels scrolled per mouse wheel tick. Defaults to 30.
-    visible : bool
-        Whether the scroll view is rendered. Defaults to True.
-    bg_color : ColorType
-        Background color of the viewport. Defaults to #f0f0f0.
-
-    Scrollbar
-    ---------
-    show_scrollbar : bool
-        Whether the scrollbar thumb is rendered. Defaults to True.
-    scrollbar_width : int
-        Thickness of the scrollbar thumb in pixels. Defaults to 10.
-    scrollbar_color : ColorType
-        Scrollbar color in normal state. Defaults to #999999.
-    scrollbar_color_hover : ColorType
-        Scrollbar color when hovered. Defaults to #777777.
-    scrollbar_color_active : ColorType
-        Scrollbar color when being dragged. Defaults to #555555.
-    scrollbar_color_pressed : ColorType
-        Scrollbar color when pressed. Defaults to #555555.
-    """
-
     pos: Vec2 = (0, 0)
     size: Vec2 = (300, 300)
 
@@ -125,81 +40,6 @@ class StyleScrollView:
     scrollbar_color_active: ColorType = "#555555"
     scrollbar_color_pressed: ColorType = "#555555"
 class ScrollView:
-
-    """
-    A scrollable viewport component that clips content to a fixed visible area
-    and provides mouse wheel scrolling and scrollbar drag interaction.
-
-    Content is rendered via a user-supplied ``render_func`` which receives
-    the main surface and the current offset array. The offset represents
-    how many pixels the content has been scrolled from its origin.
-
-    The viewport uses ``set_clip`` to restrict drawing to the visible area,
-    ensuring content outside the viewport is not rendered.
-
-    Offset
-    ------
-    ``offset`` is a numpy array ``[offset_x, offset_y]`` representing the
-    number of pixels scrolled from the content origin:
-    - ``offset[1] = 0``   → content at top (vertical)
-    - ``offset[1] = 500`` → content scrolled down 500px
-
-    The render_func must subtract offset from each item's position
-    to simulate scrolling:
-        y = item_y - offset[1]
-
-    Rendering order (back to front)
-    --------------------------------
-    1. Background   (viewport background rect)
-    2. Content      (clipped to viewport, rendered via render_func)
-    3. Scrollbar    (thumb drawn on top, only if show_scrollbar is True)
-
-    Scrollbar position
-    ------------------
-    - Vertical   : anchored to the right edge of the viewport.
-    - Horizontal : anchored to the bottom edge of the viewport.
-    Thumb size and position scale proportionally to the offset and content size.
-
-    Attributes
-    ----------
->>> surface : pygame.Surface
-
-        The surface on which the scroll view is drawn.
-
->>> style : StyleScrollView
-
-        The style/configuration object for this scroll view.
-
->>> render_func : Callable[[pygame.Surface, np.ndarray], None], optional
-
-        Function called each frame to render scrollable content.
-        Receives the main surface and the current offset array.
-
-    Methods
-    -------
->>> update() -> None
-
-        Handles mouse wheel and drag input, clamps offset, rebuilds
-        the scrollbar, and renders all elements each frame.
-        Does nothing if ``StyleScrollView.visible`` is False.
-
-    Example
-    -------
->>> def render(surface, offset):
-            for i in range(20):
-                y = 10 + i * 40 - int(offset[1])
-                pygame.draw.rect(surface, (180, 180, 180), (10, y, 280, 30))
->>> style = StyleScrollView(
-            pos=(50, 50),
-            size=(300, 400),
-            content_size=(300, 900),
-            scroll_speed=20
-        )
-        scroll = ScrollView(screen, style, render_func=render)
-        # Inside game loop
-        scroll.update()
-    """
-
     def __init__(self,
                  surface: pygame.Surface,
                  style: StyleScrollView, 

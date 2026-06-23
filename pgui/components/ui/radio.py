@@ -1,29 +1,3 @@
-"""
-RadioButton Module
-==================
-This module provides a radio button and radio button list UI component built on top of pygame.
-Unlike checkboxes, only one radio button in a group can be active at a time —
-selecting one automatically deselects all others in the same list.
-
-It includes:
-- `StateRadioButton`  : Enum defining the visual states of a radio button.
-- `StyleRadioButton`  : Dataclass holding all style/configuration options for a radio button.
-- `RadioButton`       : Renders a single interactive radio button with a text label.
-- `RadioButtonList`   : Manages a vertical list of radio buttons with exclusive selection logic.
-
-Typical usage:
->>> style = StyleRadioButton(
-        label_list=["Option A", "Option B", "Option C"],
-        checked_list=[True, False, False],
-        on_change=lambda states: print(states)
-    )
-    radio_list = RadioButtonList(surface, style)
-    # Inside game loop
-    radio_list.update()
-    # Read current states
-    states = radio_list.get_state_radio_button()
-"""
-
 import pygame
 
 from dataclasses import dataclass, field
@@ -34,111 +8,12 @@ from pgui.utils.utils_typing import Vec2, ColorType
 from pgui.utils.utils_transform import to_array, hex_to_rbg
 
 class StateRadioButton(Enum):
-
-    """
-    Enum representing the visual states of a RadioButton.
-
-    States
-    ------
-    NORMAL : int
-        Default state — no interaction is occurring.
-    HOVER : int
-        The mouse cursor is hovering over the radio button.
-    PRESSED : int
-        The radio button is currently being held down by the mouse.
-
-    Note
-    ----
-    The checked (selected) state is tracked separately via
-    ``RadioButton.__is_checked`` and overlays the visual state when active.
-    """
-
     NORMAL = 1
     HOVER = 2
     PRESSED = 3
 
 @dataclass(slots=True)
-class StyleRadioButton:
-
-    """
-    Dataclass containing all visual and behavioral configuration
-    for a RadioButton or RadioButtonList.
-
-    State-based styling
-    -------------------
-    Each visual property (bg_color, border_color, label_color) has four variants
-    corresponding to the interaction state: normal, hover, pressed, and checked.
-    The checked state takes priority over all other states when the button is selected.
-
-    Attributes
-    ----------
-    label_list : List[str]
-        List of label strings, one per radio button (used by RadioButtonList).
-    size : Vec2
-        Overall size (width, height) reserved for the component.
-    pos : Vec2
-        Position (x, y) of the first radio button on the surface.
-    border : int
-        Border thickness in pixels. Defaults to 1.
-    border_radius : int
-        Corner radius for the button border. Defaults to 50 (circle shape).
-    border_color : ColorType
-        Border color in normal state.
-    gap : int
-        Horizontal spacing between the button and its label. Defaults to 8.
-    line_height : int
-        Additional vertical spacing between buttons in a list. Defaults to 5.
-    font : pygame.font.Font
-        Font used to render button labels.
-    antialias : bool
-        Whether to apply antialiasing to rendered labels. Defaults to True.
-    visible : bool
-        Whether the component is rendered and interactive. Defaults to True.
-    on_change : Callable[[List[bool]], None], optional
-        Callback triggered when the selected radio button changes.
-        Receives the updated list of checked states.
-    on_sound : pygame.mixer.Sound, optional
-        Sound played when a radio button is selected.
-    checked_list : List[bool]
-        Initial checked state for each radio button in the list.
-
-    Normal state
-    ------------
-    bg_color : ColorType
-        Background color in normal state. Defaults to #ffffff.
-    check_color : ColorType
-        Inner indicator color in normal state. Defaults to #333333.
-    label_color : ColorType
-        Label text color in normal state. Defaults to #222222.
-
-    Hover state
-    -----------
-    bg_color_hover : ColorType
-        Background color when hovered. Defaults to #f0f0f0.
-    border_color_hover : ColorType
-        Border color when hovered. Defaults to #888888.
-    label_color_hover : ColorType
-        Label color when hovered. Defaults to #222222.
-
-    Pressed state
-    -------------
-    bg_color_pressed : ColorType
-        Background color when pressed. Defaults to #e0e0e0.
-    border_color_pressed : ColorType
-        Border color when pressed. Defaults to #555555.
-    label_color_pressed : ColorType
-        Label color when pressed. Defaults to #222222.
-
-    Checked state
-    -------------
-    bg_color_checked : ColorType
-        Background color when selected. Defaults to #4caf50.
-    border_color_checked : ColorType
-        Border color when selected. Defaults to #388e3c.
-    label_color_checked : ColorType
-        Label color when selected. Defaults to #222222.
-    """
-    
+class StyleRadioButton: 
     # general
     label_list: List[str] = field(default_factory=list)
     size: Vec2 = (200, 40)
@@ -183,64 +58,6 @@ class StyleRadioButton:
     label_color_checked: ColorType = "#222222"
 
 class RadioButton:
-
-    """
-    A single interactive radio button that renders a clickable circular button
-    and a text label beside it.
-
-    Clicking the button sets it to checked. Once checked, it cannot be unchecked
-    by clicking again — only ``RadioButtonList`` can uncheck it by selecting another
-    button in the group.
-
-    Rendering order (back to front)
-    --------------------------------
-    1. Border   (slightly larger rect behind the button)
-    2. Button   (the main circular button)
-    3. Label    (text rendered to the right, offset by gap)
-
-    State priority
-    --------------
-    Checked state overrides hover and pressed colors,
-    ensuring the selected appearance is always visually distinct.
-
-    Attributes
-    ----------
->>> surface : pygame.Surface
-
-        The surface on which the radio button is drawn.
-
->>> style : StyleRadioButton
-
-        The shared style/configuration object.
-
->>> pos : Vec2
-
-        Position (x, y) of this specific radio button on the surface.
-
->>> label : str
-
-        Text label displayed beside the radio button.
-
->>> checked : bool
-
-        Initial checked state of this radio button.
-
-    Properties
-    ----------
->>> checked : bool
-
-        Gets or sets the current checked state of the radio button.
-        Used by ``RadioButtonList`` to enforce exclusive selection.
-
-    Methods
-    -------
->>> update() -> None
-
-        Handles mouse interaction, updates checked state on click,
-        and renders the radio button each frame.
-        Does nothing if ``StyleRadioButton.visible`` is False.
-    """
-
     def __init__(self,
                  surface: pygame.Surface,
                  style: StyleRadioButton,
@@ -366,54 +183,6 @@ class RadioButton:
         self.__surface.blit(text_surface, text_rect)
 
 class RadioButtonList:
-
-    """
-    A vertical list of radio buttons with exclusive selection logic.
-
-    Only one radio button in the list can be checked at a time.
-    When a new button is selected, all others are automatically unchecked.
-    The active index is tracked internally and updated on each selection change.
-
-    Attributes
-    ----------
->>> surface : pygame.Surface
-    
-        The surface on which all radio buttons are drawn.
-    
->>> style : StyleRadioButton
-    
-        The style/configuration object defining labels, colors, and layout.
-
-    Methods
-    -------
->>> update() -> None
-
-        Enforces exclusive selection, then updates and renders all
-        radio buttons each frame.
-        Does nothing if ``StyleRadioButton.visible`` is False.
-
->>> get_state_radio_button() -> List[bool]
-
-        Returns a list of checked states for all radio buttons,
-        in the same order as ``StyleRadioButton.label_list``.
-        Only one value will be True at any given time.
-
-    Example
-    -------
->>> style = StyleRadioButton(
-            label_list=["Small", "Medium", "Large"],
-            checked_list=[False, True, False],
-            pos=(50, 100),
-            on_change=lambda states: print(states)
-        ) 
-        radio_list = RadioButtonList(surface, style)
-        # Inside game loop
-        radio_list.update()
-        # Read active selection
-        states = radio_list.get_state_radio_button()
-        # -> [False, True, False]
-    """
-
     def __init__(self,
                  surface: pygame.Surface,
                  style: StyleRadioButton):

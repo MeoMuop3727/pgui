@@ -1,26 +1,3 @@
-"""
-TextBox Module
-==============
-This module provides a static text display component built on top of pygame.
-Text is automatically word-wrapped to fit within the box's width,
-with support for padding, border, and background styling.
-
-It includes:
-- `StyleTextBox` : Dataclass holding all style/configuration options for a text box.
-- `TextBox`      : Renders wrapped text inside a styled rectangular frame.
-
-Typical usage:
->>> style = StyleTextBox(
-        content="Hello, this is a text box.",
-        size=(500, 400),
-        padding=10,
-        bg_color="#f0f0f0"
-    )
-    textbox = TextBox(surface, style)
-    # Inside game loop
-    textbox.update()
-"""
-
 import pygame
 
 from dataclasses import dataclass
@@ -31,41 +8,6 @@ from pgui.utils.utils_transform import to_array, hex_to_rbg
 
 @dataclass(slots=True)
 class StyleTextBox:
-
-    """
-    Dataclass containing all visual and layout configuration for a TextBox.
-
-    Attributes
-    ----------
-    content : str
-        The text content to display. Words are automatically wrapped
-        to fit within the box width minus padding.
-    font : pygame.font.Font
-        Font used to render the text.
-    color : ColorType
-        Text color.
-    bg_color : ColorType
-        Background color of the text box frame.
-    antialias : bool
-        Whether to apply antialiasing to rendered text. Defaults to True.
-    pos : Vec2
-        Position (x, y) of the text box on the surface.
-    size : Vec2
-        Size (width, height) of the text box.
-    border : int
-        Border thickness in pixels. 0 means no border.
-    border_radius : int
-        Corner radius for rounded borders.
-    border_color : ColorType
-        Color of the border.
-    padding : int
-        Inner spacing in pixels between the box edge and the text.
-    line_height : int
-        Reserved for future use — additional spacing between lines.
-    visible : bool
-        Whether the text box is rendered. Defaults to True.
-    """
-
     content: str = ""
     font: pygame.font.Font = pygame.font.Font(None, 25)
     color: ColorType = "#333333"
@@ -81,53 +23,6 @@ class StyleTextBox:
     visible: bool = True
 
 class TextBox: 
-
-    """
-    A static text display component that renders word-wrapped text
-    inside a styled rectangular frame.
-
-    Text is wrapped automatically based on the box width and padding.
-    Each line is rendered top-to-bottom with spacing derived from
-    the font's line height.
-
-    Rendering order (back to front)
-    --------------------------------
-    1. Border      (slightly larger rect behind the frame)
-    2. Background  (the main frame rect)
-    3. Text        (word-wrapped lines, offset by padding)
-
-    Attributes
-    ----------
->>> surface : pygame.Surface
-
-        The surface on which the text box is drawn.
-
->>> style : StyleTextBox
-
-        The style/configuration object for this text box.
-
-    Methods
-    -------
->>> update() -> None
-
-        Draws the border, background, and wrapped text each frame.
-        Does nothing if `StyleTextBox.visible` is False.
-
-    Example
-    -------
->>> style = StyleTextBox(
-            content="This is a long text that will be wrapped automatically.",
-            size=(400, 300),
-            padding=12,
-            bg_color="#ffffff",
-            border=2,
-            border_color="#aaaaaa"
-        )
-        textbox = TextBox(surface, style)
-        # Inside game loop
-        textbox.update()
-    """
-
     def __init__(self,
                  surface: pygame.Surface,
                  style: StyleTextBox):

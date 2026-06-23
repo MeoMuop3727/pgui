@@ -1,34 +1,3 @@
-"""
-Slider Module
-=============
-This module provides a slider UI component built on top of pygame and numpy.
-The slider supports both horizontal and vertical orientations, stepped value
-snapping, and separates input handling from rendering for flexibility.
-
-It includes:
-- `StateSlider`  : Enum defining the visual states of a slider.
-- `StyleSlider`  : Dataclass holding all style/configuration options for a slider.
-- `Slider`       : Renders an interactive slider with a track, fill, and draggable thumb.
-
-Typical usage:
->>> style = StyleSlider(
-        min_value=0,
-        max_value=100,
-        value=50,
-        step=1,
-        track_size=(250, 5),
-        thumb_size=(20, 20),
-        pos=(100, 200)
-    )
-    slider = Slider(surface, style)
-    # Inside game loop
-    slider.update()
-    # Inside event loop
-    slider.input(events)
-    # Read current value
-    current = slider.value
-"""
-
 import pygame
 import numpy as np
 
@@ -40,90 +9,12 @@ from pgui.utils.utils_typing import Vec2, ColorType, Number
 from pgui.utils.utils_transform import to_array, hex_to_rbg
 
 class StateSlider(Enum):
-
-    """
-    Enum representing the visual states of a Slider thumb.
-
-    States
-    ------
-    NORMAL : int
-        Default state — no interaction is occurring.
-    HOVER : int
-        The mouse cursor is hovering over the thumb.
-    PRESSED : int
-        The thumb is currently being dragged by the mouse.
-    """
-
     NORMAL = 1
     HOVER = 2
     PRESSED = 3
 
 @dataclass(slots=True)
 class StyleSlider:
-
-    """
-    Dataclass containing all visual and layout configuration for a Slider.
-
-    Layout
-    ------
-    The slider consists of three overlapping elements:
-    - Track : the full background bar.
-    - Fill  : the colored portion from the track start to the thumb position.
-    - Thumb : the draggable indicator that represents the current value.
-
-    Orientation
-    -----------
-    - ``horizontal`` : thumb moves left to right, fill grows from left.
-    - ``vertical``   : thumb moves bottom to top, fill grows from bottom.
-
-    Attributes
-    ----------
-    min_value : Number
-        Minimum value of the slider range. Defaults to 0.
-    max_value : Number
-        Maximum value of the slider range. Defaults to 100.
-    value : Number
-        Initial value of the slider. Defaults to 0.
-    step : Number
-        Snap increment — value is rounded to the nearest multiple of step.
-        Defaults to 1.
-    orientation : Literal["horizontal", "vertical"]
-        Direction of the slider. Defaults to "horizontal".
-    track_size : Vec2
-        Size (length, thickness) of the track.
-        For vertical sliders, axes are swapped internally. Defaults to (250, 5).
-    thumb_size : Vec2
-        Size (width, height) of the thumb indicator. Defaults to (20, 20).
-    pos : Vec2
-        Position (x, y) of the track on the surface. Defaults to (0, 0).
-    visible : bool
-        Whether the slider is rendered. Defaults to True.
-
-    Track
-    -----
-    track_color : ColorType
-        Track background color in normal state.
-    track_color_hover : ColorType
-        Track color when the thumb is hovered.
-    track_color_pressed : ColorType
-        Track color when the thumb is being dragged.
-    fill_color_active : ColorType
-        Color of the filled portion of the track. Defaults to #4caf50.
-    track_border_radius : int
-        Corner radius of the fill rect. Defaults to 50.
-
-    Thumb
-    -----
-    thumb_color : ColorType
-        Thumb color in normal state. Defaults to #ffffff.
-    thumb_color_hover : ColorType
-        Thumb color when hovered. Defaults to #f0f0f0.
-    thumb_color_pressed : ColorType
-        Thumb color when pressed. Defaults to #e0e0e0.
-    thumb_border_radius : int
-        Corner radius of the thumb rect. Defaults to 50 (circle shape).
-    """
-
     min_value: Number = 0
     max_value: Number = 100
     value: Number = 0
@@ -155,80 +46,6 @@ class StyleSlider:
     thumb_border_radius: int = 50
 
 class Slider:
-
-    """
-    An interactive slider component that renders a track, a fill bar,
-    and a draggable thumb to represent and control a numeric value.
-
-    Rendering and input are intentionally separated:
-    - ``update()`` handles rendering each frame.
-    - ``input()``  handles mouse events for dragging.
-
-    Both must be called every frame for the slider to work correctly.
-
-    Rendering order (back to front)
-    --------------------------------
-    1. Track   (full background bar)
-    2. Fill    (colored portion from track start to thumb center)
-    3. Thumb   (draggable indicator at the current value position)
-
-    Value calculation
-    -----------------
-    The thumb position is derived from the current value ratio
-    relative to min_value and max_value. When dragging, the mouse
-    position is converted back to a value and snapped to the nearest
-    step increment.
-
-    Attributes
-    ----------
->>> surface : pygame.Surface
-
-        The surface on which the slider is drawn.
-
->>> style : StyleSlider
-
-        The style/configuration object for this slider.
-
-    Properties
-    ----------
->>> value : Number
-
-        Gets or sets the current value of the slider.
-        Setting the value externally does not rebuild rects automatically —
-        call ``update()`` to reflect changes visually.
-
-    Methods
-    -------
->>> update() -> None
-
-        Determines the visual state and renders the track, fill,
-        and thumb each frame.
-        Does nothing if ``StyleSlider.visible`` is False.
-
->>> input(events: List[pygame.event.Event]) -> None
-
-        Processes mouse events to handle thumb dragging.
-        Updates value, thumb position, and fill rect when dragging.
-        Must be called inside the event loop each frame.
-
-    Example
-    -------
->>> style = StyleSlider(
-            min_value=0,
-            max_value=100,
-            value=30,
-            step=5,
-            track_size=(300, 6),
-            pos=(50, 150)
-        )
-
->>> slider = Slider(surface, style)
->>> # Inside game loop
->>> slider.update()
->>> slider.input(pygame.event.get())
->>> volume = slider.value  # → 30
-    """
-
     def __init__(self,
                  surface: pygame.Surface,
                  style: StyleSlider):

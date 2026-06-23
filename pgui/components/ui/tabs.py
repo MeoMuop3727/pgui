@@ -1,30 +1,3 @@
-"""
-Tab Module
-==========
-This module provides a tab-based UI component built on top of pygame,
-using `ButtonText` internally to render clickable tab panels.
-
-It includes:
-- `StyleTab`  : Dataclass holding all style/configuration options for a tab.
-- `TabPanel`  : Renders a row/column of clickable tab buttons and tracks the active tab.
-- `TabFrame`  : Renders the content area corresponding to the active tab.
-- `Tab`       : Top-level component combining `TabPanel` and `TabFrame` into one widget.
-
-Typical usage:
->>> def render_home(surface): ...
->>> def render_settings(surface): ...
-
->>> style = StyleTab(
-        tabs_list=["Home", "Settings"],
-        tabs_func=[render_home, render_settings],
-        tab_panel_type="horizontal",
-        size=(700, 500)
-    )
-    tab = Tab(surface, style)
-    # Inside game loop
-    tab.update()
-"""
-
 import pygame
 
 from dataclasses import dataclass, field
@@ -36,69 +9,6 @@ from pgui.components.ui.button import ButtonText, StyleButton
 
 @dataclass(slots=True)
 class StyleTab:
-
-    """
-    Dataclass containing all visual and behavioral configuration for a Tab component.
-
-    Tab Panel Styling
-    -----------------
-    Each tab button supports four visual states: normal, hover, pressed, and active.
-    The active state represents the currently selected tab.
-
-    Attributes
-    ----------
-    tabs_list : List[str]
-        Labels for each tab button.
-    tabs_func : List[Callable, optional]
-        Callback functions for each tab's content area.
-        Each function receives either a subsurface or no argument:
-            - func(surface: pygame.Surface) → renders into the frame
-            - func()                        → renders independently
-
-    color : ColorType
-        Text color in normal state.
-    bg_color : ColorType
-        Background color in normal state.
-
-    color_hover : ColorType
-        Text color when hovered.
-    bg_color_hover : ColorType
-        Background color when hovered.
-
-    color_pressed : ColorType
-        Text color when pressed.
-    bg_color_pressed : ColorType
-        Background color when pressed.
-
-    color_active : ColorType
-        Text color of the currently active tab.
-    bg_color_active : ColorType
-        Background color of the currently active tab.
-
-    General
-    -------
-    font : pygame.font.Font
-        Font used to render tab labels.
-    pos : Vec2
-        Position (x, y) of the entire tab component on the surface.
-    percent_width_tab_panel : float
-        Fraction of total width allocated to the tab panel (horizontal layout).
-    percent_height_tab_panel : float
-        Fraction of total height allocated to the tab panel (vertical layout).
-    size : Vec2
-        Total size (width, height) of the tab component.
-    active_tab : int
-        Index of the initially active tab. Defaults to 0.
-    visible : bool
-        Whether the tab component is rendered. Defaults to True.
-    tab_panel_type : Literal["horizontal", "vertical"]
-        Layout direction of the tab panel.
-        - "horizontal" : tab buttons are stacked vertically on the left side.
-        - "vertical"   : tab buttons are arranged horizontally along the top.
-    bg_frame_color : ColorType
-        Background color of the content frame area.
-    """
-
     # tab panel
     tabs_list: List[str] = field(default_factory=lambda: ["Tab 1"])
     tabs_func: List[Optional[Callable[[], None]]] = field(default_factory=lambda: [])
@@ -131,38 +41,6 @@ class StyleTab:
     bg_frame_color: ColorType = "#cccccc"
 
 class TabPanel:
-
-    """
-    Renders a list of clickable tab buttons and tracks the currently active tab.
-
-    Tab buttons are created from `StyleTab.tabs_list` and laid out according
-    to `StyleTab.tab_panel_type`. Clicking a tab updates the active index
-    and rebuilds the button list to reflect the new active style.
-
-    Attributes
-    ----------
->>> surface : pygame.Surface
-
-        The surface on which tab buttons are drawn.
->>> style : StyleTab
-
-        The style/configuration object for this tab panel.
-
-    Methods
-    -------
->>> update() -> None
-
-        Draws and updates all tab buttons each frame.
-
->>> get_size_tab_panel() -> Vec2
-
-        Returns the size (width, height) of a single tab button.
-
->>> get_tab_panel_active() -> int
-
-        Returns the index of the currently active tab.
-    """
-
     def __init__(self, 
                  surface: pygame.Surface,
                  style: StyleTab):
@@ -235,38 +113,6 @@ class TabPanel:
         self.__list_panel = self.__create_list_tabs_panel()
 
 class TabFrame:
-
-    """
-    Renders the content area corresponding to the currently active tab.
-
-    The frame is positioned adjacent to the `TabPanel` — to the right
-    for horizontal layouts, or below for vertical layouts. On each
-    `update()` call, it fills the frame background and invokes the
-    active tab's render function.
-
-    The render function in `StyleTab.tabs_func` is called with a subsurface
-    if it accepts a surface argument, otherwise it is called with no arguments.
-
-    Attributes
-    ----------
->>> surface : pygame.Surface
-
-        The surface on which the frame is drawn.
->>> style : StyleTab
-
-        The style/configuration object for this tab frame.
-
-    Methods
-    -------
->>> update(active_tab: int) -> None
-
-        Redraws the frame background and invokes the active tab's render function.
-
->>> get_pos_surface_frame_content() -> Vec2
-
-        Returns the top-left position of the content frame on the surface.
-    """
-
     def __init__(self,
                  surface: pygame.Surface,
                  style: StyleTab):
@@ -320,39 +166,6 @@ class TabFrame:
                     self.__style.tabs_func[active_tab]()
 
 class Tab:
-
-    """
-    Top-level tab component combining `TabPanel` and `TabFrame` into one widget.
-
-    Manages the full tab UI: renders the clickable tab buttons via `TabPanel`
-    and the corresponding content area via `TabFrame`, keeping both in sync
-    through the active tab index.
-
-    Attributes
-    ----------
->>> style : StyleTab
-
-        The style/configuration object controlling layout and appearance.
-
-    Methods
-    -------
->>> update() -> None
-
-        Updates and renders both the tab panel and the content frame each frame.
-        Does nothing if `StyleTab.visible` is False.
-
-    Example
-    -------
->>> style = StyleTab(
-            tabs_list=["Home", "Settings"],
-            tabs_func=[render_home, render_settings],
-            size=(700, 500)
-        )
-        tab = Tab(surface, style)
-        # Inside game loop
-        tab.update()
-    """
-
     def __init__(self,
                  surface: pygame.Surface,
                  style: StyleTab):

@@ -1,47 +1,3 @@
-"""
-Draw System Module
-==================
-This module provides a lightweight pixel-based drawing system built on top
-of pygame and numpy.
-
-The system converts an indexed color matrix into a pygame surface using
-`pygame.surfarray`, then renders the result onto a target surface.
-It supports:
-- Palette-based rendering
-- Dynamic image rebuilding
-- Surface scaling
-- Position management
-- Dirty-buffer optimization
-
-It includes:
-- `DrawSystem` : Converts a matrix of color indices into a renderable image.
-
-Typical usage:
-    >>> colors = numpy.array([
-            [0, 0, 0],
-            [255, 255, 255]
-        ], dtype=numpy.uint8)
-
-    >>> matrix = numpy.array([
-            [0, 1],
-            [1, 0]
-        ], dtype=numpy.uint8)
-
-    >>> draw = DrawSystem(
-            surface=screen,
-            colors=colors,
-            matrix=matrix,
-            pos=(100, 100),
-            scale=8
-        )
-
-    >>> draw.update()
-
-Dependencies:
-- pygame
-- numpy
-"""
-
 import pygame, numpy
 import pygame.surfarray as surfarray
 
@@ -51,21 +7,6 @@ from pgui.utils.utils_typing import Vec2
 from pgui.utils.utils_transform import to_array
 
 class DrawSystem:
-
-    """
-    A lightweight pixel rendering system built with pygame and numpy.
-
-    The class converts a matrix of indexed colors into a pygame surface,
-    applies optional scaling, and renders the result onto a target surface.
-
-    Features:
-    - Palette-based rendering
-    - Dynamic image rebuilding
-    - Position management
-    - Dirty-buffer optimization
-    - Surface scaling
-    """
-
     def __init__(self,
                  surface: pygame.Surface,
                  colors: NDArray[numpy.uint8],

@@ -219,3 +219,6 @@ __marimo__/
 
 # Testing
 tests/
+
+# Assets
+pgui/assets/
