@@ -1,4 +1,4 @@
-from pgui.components.scenes.manager_scene import ManageScence
-from pgui.components.scenes.scene import Scence
+from pgui.components.scenes.manager_scene import ManageScene
+from pgui.components.scenes.scene import Scene
 
-__all__ = ["ManageScence", "Scence"]
+__all__ = ["ManageScene", "Scene"]

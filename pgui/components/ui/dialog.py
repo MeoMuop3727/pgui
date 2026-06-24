@@ -3,12 +3,12 @@ import pygame
 from typing import Optional
 from pgui.utils.utils_typing import Number
 
-from pgui.components.scenes.scene import Scence
+from pgui.components.scenes.scene import Scene
 from .textbox import TextBox, StyleTextBox
 from .button import ButtonText, StyleButton
 from pgui.utils.utils_transform import to_array
 
-class Dialog(Scence):
+class Dialog(Scene):
     def __init__(self, 
                  surface: pygame.Surface,
                  font: pygame.font.Font = pygame.font.Font(None, 30),

@@ -1,29 +1,8 @@
-"""
-ManageScene Module
-==================
-This module provides a stack-based scene management system for pygame applications.
-
-Scenes are pushed onto and popped off a stack, with only the top scene
-being active at any given time. This allows for clean transitions between
-game states such as menus, gameplay, and pause screens.
-
-It includes:
-- `ManageScene` : Manages the scene stack and drives the main game loop.
-
-Typical usage:
->>> screen = pygame.display.set_mode((800, 600))
-
->>> manager = ManageScene(screen)
->>> manager.push_scene(MainMenuScene())
-
->>> manager.run(fps=60)
-"""
-
 import pygame, sys
-from pgui.components.scenes.scene import Scence
+from pgui.components.scenes.scene import Scene
 from pgui.utils.utils_typing import Number
 
-class ManageScence:
+class ManageScene:
 
     """
     Stack-based scene manager that drives the main pygame game loop.
@@ -32,41 +11,20 @@ class ManageScence:
     is active — receiving events, updates, and render calls each frame.
     Scenes can be pushed, popped, or replaced to handle transitions
     between game states.
-
-    Attributes
-    ----------
->>> screen : pygame.Surface
-
-        The main display surface passed to the active scene each frame.
-
-    Example
-    -------
->>> manager = ManageScene(screen)
-        manager.push_scene(MainMenuScene())
-        manager.run(fps=60)
     """
 
     def __init__(self, screen: pygame.Surface):
-        """
-        Initialize the scene manager.
-
-        Parameters
-        ----------
-        screen : pygame.Surface
-            The main display surface used for rendering.
-        """
-
         self.__screen = screen
 
-        self.__scences: list[Scence] = []
+        self.__scenes: list[Scene] = []
         self.__running = True
         self.__clock = pygame.time.Clock()
         
-    def get_scences(self) -> list[Scence]:
-        """Return stack scences @Scence"""
-        return self.__scences
+    def get_scenes(self) -> list[Scene]:
+        """Return stack scenes @scene"""
+        return self.__scenes
 
-    def push_scence(self, scence: Scence) -> None:
+    def push_scene(self, scene: Scene) -> None:
         """
         Push a new scene onto the top of the stack and activate it.
 
@@ -79,11 +37,11 @@ class ManageScence:
             The scene to push onto the stack.
         """
 
-        scence.manager = self
-        self.__scences.append(scence)
-        scence.on_enter()
+        scene.manager = self
+        self.__scenes.append(scene)
+        scene.on_enter()
 
-    def pop_scence(self) -> None:
+    def pop_scene(self) -> None:
         """
         Pop the top scene off the stack and deactivate it.
 
@@ -91,11 +49,11 @@ class ManageScence:
         Does nothing if the stack is empty.
         """
         
-        if self.__scences:
-            scence = self.__scences.pop()
-            scence.on_exit()
+        if self.__scenes:
+            scene = self.__scenes.pop()
+            scene.on_exit()
     
-    def replace_scence(self, scence: Scence) -> None:
+    def replace_scene(self, scene: Scene) -> None:
         """
         Replace the current top scene with a new one.
 
@@ -107,10 +65,10 @@ class ManageScence:
             The scene to replace the current top scene with.
         """
 
-        self.pop_scence()
-        self.push_scence(scence)
+        self.pop_scene()
+        self.push_scene(scene)
     
-    def get_current_scence(self) -> Scence:
+    def get_current_scene(self) -> Scene:
         """
         Return the scene currently at the top of the stack.
 
@@ -120,7 +78,7 @@ class ManageScence:
             The active scene, or None if the stack is empty.
         """
 
-        return self.__scences[-1] if self.__scences else None
+        return self.__scenes[-1] if self.__scenes else None
     
     def run(self, fps: Number = 60) -> None:
         """
@@ -146,18 +104,18 @@ class ManageScence:
 
             events = pygame.event.get()
 
-            current_scence = self.get_current_scence()
+            current_scene = self.get_current_scene()
 
             for event in events:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-            if not current_scence: continue
+            if not current_scene: continue
 
-            current_scence.handle_event(events)
-            current_scence.render(self.__screen)
-            current_scence.update(dt)
+            current_scene.handle_event(events)
+            current_scene.render(self.__screen)
+            current_scene.update(dt)
 
             pygame.display.flip()
             
