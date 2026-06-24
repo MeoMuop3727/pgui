@@ -1,27 +1,37 @@
 import pygame
 
 from typing import Optional
-from pgui.utils.utils_typing import Number
+from pgui.utils.utils_typing import ColorType, Number
 
 from pgui.components.scenes.scene import Scene
 from .textbox import TextBox, StyleTextBox
 from .button import ButtonText, StyleButton
+from .background import BackgroundImage
 from pgui.utils.utils_transform import to_array
 
 class Dialog(Scene):
     def __init__(self, 
                  surface: pygame.Surface,
                  font: pygame.font.Font = pygame.font.Font(None, 30),
+                 bg_color: ColorType = "#000000",
+                 color_font: ColorType = "#ffffff",
+                 border_color: ColorType = "#ffffff",
                  list_dialogs: Optional[list[str]] = None,
                  speed: Number = 10,
-                 stlye_button: Optional[StyleButton] = None,
+                 style_button: Optional[StyleButton] = None,
                  list_choose: Optional[dict[str, list[str]]] = None, 
                  new_list_dialog: Optional[dict[str, list[str]]] = None, 
-                 stages: list[str] = []):
+                 stages: list[str] = [],
+                 background_image: Optional[BackgroundImage] = None):
         super().__init__()
 
         self.__surface = surface
+        self.__bg_image = background_image
+
         self.__font = font
+        self.__bg_color = bg_color
+        self.__color_font = color_font
+        self.__border_color = border_color
         self.__speed = speed
 
         self.__box_dialog = TextBox(self.__surface, StyleTextBox())
@@ -39,7 +49,7 @@ class Dialog(Scene):
         self.__new_list_dialog = new_list_dialog
         self.__stages = stages
 
-        self.__style_button = stlye_button if stlye_button is not None else StyleButton()
+        self.__style_button = style_button if style_button is not None else StyleButton()
         self.__list_button: list[ButtonText] = []
     
     def update(self, dental):
@@ -55,11 +65,11 @@ class Dialog(Scene):
                 content=self.__content,
                 size=(int(self.__size_box_dialog[0]), int(self.__size_box_dialog[1])),
                 pos=(int(self.__pos_box_dialog[0]), int(self.__pos_box_dialog[1])),
-                bg_color="#000000",
-                color="#ffffff",
+                bg_color=self.__bg_color,
+                color=self.__color_font,
                 font=self.__font,
                 border=self.__border_box_dialog,
-                border_color="#ffffff",
+                border_color=self.__border_color,
                 padding=8
             )
         )
@@ -95,10 +105,12 @@ class Dialog(Scene):
                     if self.__current_dialog < len(self.__list_dialogs):
                         self.__index_text = 0
                     else:
-                        self.manager.pop_scence()
+                        self.manager.pop_scene()
     
     def render(self, screen):
-        screen.fill("#000000")
+        if self.__bg_image is None: screen.fill("#000000")
+        else: self.__bg_image.update()
+        
         self.__box_dialog.update()
         self.__event()
     

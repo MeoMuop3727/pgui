@@ -5,8 +5,8 @@ from typing import Optional, Literal, Dict
 
 from pgui.utils.utils_typing import Vec2, ColorType
 from pgui.utils.utils_transform import to_array, hex_to_rbg
-from pgui.components.ui.button import ButtonText, StyleButton
-from pgui.components.ui.textbox import TextBox, StyleTextBox
+from .button import ButtonText, StyleButton
+from .textbox import TextBox, StyleTextBox
 
 @dataclass(slots=True)
 class StyleAlert:
@@ -31,7 +31,7 @@ class StyleAlert:
 
     padding: int = 0
 
-    per_height_title_frame: float = 0.20
+    per_height_title_frame: float = 0.2
 
     visible: bool = True
 

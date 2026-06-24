@@ -12,7 +12,7 @@ class BackgroundImage:
 
         try:
             self.__background_img = pygame.image.load(path)
-        except FileNotFoundError:
+        except (FileNotFoundError, TypeError):
             self.__background_img = pygame.Rect(self.__pos, surface.get_size())
             self.__error_load_img = True
 

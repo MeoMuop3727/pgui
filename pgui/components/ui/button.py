@@ -275,9 +275,7 @@ class ButtonImage(Button):
 
         return image
     
-    def __get_color_border_state(self, state: StateButton) -> ColorType:
-        color = None
-        
+    def __get_color_border_state(self, state: StateButton) -> ColorType:        
         if state == StateButton.NORMAL: color = self.style.border_color
         elif state == StateButton.PRESSED: color = self.style.border_color_pressed
         elif state == StateButton.HOVER: color = self.style.border_color_hover
