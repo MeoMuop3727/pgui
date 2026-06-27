@@ -108,13 +108,13 @@ import pygame
 
 pygame.init()
 
-from pgui.scenes import *
+from pgui.components.scenes import *
 from pgui.components.ui import *
 
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("My Game")
 
-manager = SceneManager(screen)
+manager = ManagerScene(screen)
 
 class MainScene(Scene):
     def __init__(self, surface: pygame.Surface):
