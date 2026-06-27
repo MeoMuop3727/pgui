@@ -167,13 +167,12 @@ class ButtonText(Button):
             color_text = self.__get_color_text_state(visual_state)
             color_border = self.__get_color_border_state(visual_state)
 
-            self.__draw_border_button(color_border)
+            if self.style.border > 0:
+                self.__draw_border_button(color_border)
             self.__draw_bg_button(color_bg)
             self.__draw_text_button(color_text)
 
     def __get_color_bg_state(self, state: StateButton) -> ColorType:
-        color = None
-
         if state == StateButton.NORMAL: color = self.style.bg_color
         elif state == StateButton.PRESSED: color = self.style.bg_color_pressed
         elif state == StateButton.HOVER: color = self.style.bg_color_hover
@@ -181,9 +180,7 @@ class ButtonText(Button):
 
         return hex_to_rbg(color)
 
-    def __get_color_text_state(self, state: StateButton) -> ColorType:
-        color = None
-        
+    def __get_color_text_state(self, state: StateButton) -> ColorType:        
         if state == StateButton.NORMAL: color = self.style.color
         elif state == StateButton.PRESSED: color = self.style.color_pressed
         elif state == StateButton.HOVER: color = self.style.color_hover
@@ -191,9 +188,7 @@ class ButtonText(Button):
 
         return hex_to_rbg(color)
 
-    def __get_color_border_state(self, state: StateButton) -> ColorType:
-        color = None
-        
+    def __get_color_border_state(self, state: StateButton) -> ColorType:        
         if state == StateButton.NORMAL: color = self.style.border_color
         elif state == StateButton.PRESSED: color = self.style.border_color_pressed
         elif state == StateButton.HOVER: color = self.style.border_color_hover
@@ -214,7 +209,7 @@ class ButtonText(Button):
     def __draw_border_button(self, color: ColorType):
         border_width: Vec2 = (self.style.border, self.style.border)
         size_border = to_array(self.style.size) + to_array(border_width) * 2
-        pos_border = to_array(self.style.pos) - to_array(border_width)
+        pos_border = to_array(self.pos) - to_array(border_width)
 
         border = pygame.Rect(
             (int(pos_border[0]), int(pos_border[1])),
