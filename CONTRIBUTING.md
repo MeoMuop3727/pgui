@@ -32,7 +32,6 @@ pgui/
 │   ├── utils/
 │   └── __init__.py
 │
-├── tests/                # Testing modules
 ├── pyproject.toml        # Package configuration
 ├── README.md
 ├── CONTRIBUTING.md
@@ -59,7 +58,7 @@ from pgui.components.ui import *
 ## Clone Repository
 
 ```bash
-git clone -b develop https://github.com/MeoMuop3727/pgui.git
+git clone -b main https://github.com/MeoMuop3727/pgui.git
 cd pgui
 ```
 
@@ -103,7 +102,7 @@ This command will:
 PGUI can also be embedded directly into another project.
 
 ```bash
-git submodule add -b develop https://github.com/MeoMuop3727/pgui.git libs/pgui
+git submodule add -b main https://github.com/MeoMuop3727/pgui.git libs/pgui
 git submodule update --init --recursive
 ```
 

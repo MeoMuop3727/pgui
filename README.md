@@ -89,7 +89,7 @@ This command will:
 PGUI can also be embedded directly into another project.
 
 ```bash
-git submodule add -b develop https://github.com/MeoMuop3727/pgui.git libs/pgui
+git submodule add -b main https://github.com/MeoMuop3727/pgui.git libs/pgui
 git submodule update --init --recursive
 ```
 
@@ -161,7 +161,6 @@ pgui/
 │   ├── utils/            # Helper utilities
 │   └── __init__.py
 │
-├── tests/                # Testing modules
 ├── pyproject.toml        # Package configuration
 ├── README.md
 ├── CONTRIBUTING.md
